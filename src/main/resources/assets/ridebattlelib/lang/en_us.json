@@ -1,13 +1,16 @@
 {
-  "itemGroup.ridebattlelib": "Example Mod Tab",
-  "block.ridebattlelib.example_block": "Example Block",
-  "item.ridebattlelib.example_item": "Example Item",
-
-  "ridebattlelib.configuration.title": "RideBattle Lib Configs",
-  "ridebattlelib.configuration.section.ridebattlelib.common.toml": "RideBattle Lib Configs",
-  "ridebattlelib.configuration.section.ridebattlelib.common.toml.title": "RideBattle Lib Configs",
-  "ridebattlelib.configuration.items": "Item List",
-  "ridebattlelib.configuration.logDirtBlock": "Log Dirt Block",
-  "ridebattlelib.configuration.magicNumberIntroduction": "Magic Number Text",
-  "ridebattlelib.configuration.magicNumber": "Magic Number"
+  "category.ridebattlelib": "RideBattle",
+  "key.ridebattlelib.unhenshin": "UnHenshin",
+  "key.ridebattlelib.driver_activate": "Activate Driver",
+  "key.ridebattlelib.return_items": "Return Driver Items",
+  "key.ridebattlelib.skill": "Skill",
+  "ridebattlelib.configuration.penaltyEnabled": "Penalty Enabled",
+  "ridebattlelib.configuration.penaltyThreshold": "Threshold to Penalty",
+  "ridebattlelib.configuration.cooldownDuration": "Penalty Cooldown Time",
+  "ridebattlelib.configuration.knockbackStrength": "KnockBack Strength",
+  "ridebattlelib.configuration.explosionPower": "Penalty Explosion Power",
+  "ridebattlelib.configuration.keyCooldown": "Key Cooldown",
+  "ridebattlelib.configuration.interactionCooldown": "RightClick Cooldown",
+  "ridebattlelib.configuration.debugMode": "Debug Mode",
+  "ridebattlelib.configuration.developerMode": "Developer Mode"
 }

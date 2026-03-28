@@ -1,5 +1,7 @@
-package com.jpigeon.ridebattlelib;
+package com.jpigeon.ridebattlelib.client;
 
+import com.jpigeon.ridebattlelib.RideBattleLib;
+import com.jpigeon.ridebattlelib.common.registry.RiderRegistry;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -18,6 +20,14 @@ public class RideBattleLibClient {
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
+        RideBattleLib.LOGGER.info("请确保骑士初始化在ClientSetup中哦~");
+        // ExampleBasic.init();
+        // ExampleDynamicForm.init();
 
+        event.enqueueWork(() -> RiderRegistry.getRegisteredRiders().forEach(config -> {
+            if (config.getDriverItem() == null) {
+                RideBattleLib.LOGGER.error("骑士 {} 未设置驱动器物品!", config.getRiderId());
+            }
+        }));
     }
 }
