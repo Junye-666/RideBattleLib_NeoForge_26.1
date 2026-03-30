@@ -57,9 +57,7 @@ public class PacketHandler {
                             }
                         })
                 .playToServer(ReturnItemsPayload.TYPE, ReturnItemsPayload.STREAM_CODEC,
-                        (payload, context) -> {
-                            DriverSystem.getInstance().returnItems(context.player());
-                        })
+                        (payload, context) -> DriverSystem.getInstance().returnItems(context.player()))
                 .playToServer(ExtractItemPayload.TYPE, ExtractItemPayload.STREAM_CODEC,
                         (payload, context) -> {
                             Player targetPlayer = context.player().level().getPlayerByUUID(payload.playerId());

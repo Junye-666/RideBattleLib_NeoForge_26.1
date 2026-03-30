@@ -2,7 +2,6 @@ package com.jpigeon.ridebattlelib.server.handler;
 
 import com.jpigeon.ridebattlelib.Config;
 import com.jpigeon.ridebattlelib.RideBattleLib;
-import com.jpigeon.ridebattlelib.common.api.RideBattleAPI;
 import com.jpigeon.ridebattlelib.common.config.FormConfig;
 import com.jpigeon.ridebattlelib.common.config.RiderConfig;
 import com.jpigeon.ridebattlelib.common.config.TriggerType;
@@ -13,6 +12,8 @@ import com.jpigeon.ridebattlelib.common.registry.RiderArmorRegistry;
 import com.jpigeon.ridebattlelib.common.registry.RiderRegistry;
 import com.jpigeon.ridebattlelib.common.util.HenshinUtils;
 import com.jpigeon.ridebattlelib.server.system.DriverSystem;
+import com.jpigeon.ridebattlelib.server.system.HenshinSystem;
+import com.jpigeon.ridebattlelib.server.system.helper.SyncManager;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -146,7 +147,7 @@ public class DriverHandler {
 
         if (inserted) {
             if (player instanceof ServerPlayer serverPlayer) {
-                RideBattleAPI.getSyncManager().syncDriverData(serverPlayer);
+                SyncManager.getInstance().syncDriverData(serverPlayer);
             }
 
             FormConfig formConfig = config.getActiveFormConfig(player);
@@ -173,8 +174,8 @@ public class DriverHandler {
     public static void onEquipmentChange(LivingEquipmentChangeEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         // 是否处于变身状态
-        if (!RideBattleAPI.isTransformed(player)) return;
-        RiderConfig config = RideBattleAPI.getActiveRiderConfig(player);
+        if (!HenshinUtils.isTransformed(player)) return;
+        RiderConfig config = RiderConfig.findActiveDriverConfig(player);
         if (config == null) return;
 
         // 只关心骑士驱动器槽位
@@ -185,7 +186,7 @@ public class DriverHandler {
 
         // 如果试图移除驱动器
         if (isRiderDriver(from)) {
-            RideBattleAPI.unTransform(player);
+            HenshinSystem.getInstance().unHenshin(player);
         }
     }
 

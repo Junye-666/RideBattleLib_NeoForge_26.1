@@ -12,13 +12,7 @@ public final class PayloadUtils {
      */
     public static StreamCodec<@NotNull FriendlyByteBuf, @NotNull Identifier> nullableResourceLocation() {
         return StreamCodec.of(
-                (buf, loc) -> {
-                    if (loc == null) {
-                        buf.writeUtf("ridebattlelib:null");
-                    } else {
-                        buf.writeUtf(loc.toString());
-                    }
-                },
+                (buf, loc) -> buf.writeUtf(loc.toString()),
                 buf -> {
                     String s = buf.readUtf();
                     if (RiderUtils.NULL_MARKER.equals(s)) {

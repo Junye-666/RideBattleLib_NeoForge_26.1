@@ -60,9 +60,12 @@ public class RideBattleAPI {
      * @return 是否成功发起变身
      */
     public static boolean transform(Player player) {
-        if (Config.DEVELOPER_MODE.get()) RideBattleLib.LOGGER.debug("尝试为玩家{}变身", player.getName().getString());
-        ClientPacketDistributor.sendToServer(new DriverActionPayload(player.getUUID()));
-        return true;
+        if (!isTransformed(player)) {
+            if (Config.DEVELOPER_MODE.get()) RideBattleLib.LOGGER.debug("尝试为玩家{}变身", player.getName().getString());
+            ClientPacketDistributor.sendToServer(new DriverActionPayload(player.getUUID()));
+            return true;
+        }
+        return false;
     }
 
     /**

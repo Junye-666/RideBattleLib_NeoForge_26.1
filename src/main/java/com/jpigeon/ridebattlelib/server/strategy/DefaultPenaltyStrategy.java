@@ -38,7 +38,7 @@ public class DefaultPenaltyStrategy implements IPenaltyStrategy {
 
     @Override
     public boolean shouldTriggerPenalty(Player player) {
-        if (!Config.PENALTY_ENABLED.get()) return false;
+        if (!penaltyEnabled()) return false;
         return HenshinUtils.isTransformed(player) &&
                 player.getHealth() <= getPenaltyThreshold() &&
                 !isInCooldown(player);

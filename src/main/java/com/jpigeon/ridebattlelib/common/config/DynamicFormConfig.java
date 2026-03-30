@@ -2,8 +2,8 @@ package com.jpigeon.ridebattlelib.common.config;
 
 import com.jpigeon.ridebattlelib.Config;
 import com.jpigeon.ridebattlelib.RideBattleLib;
+import com.jpigeon.ridebattlelib.common.util.RiderUtils;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
@@ -13,7 +13,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.equipment.Equippable;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -83,8 +82,6 @@ public class DynamicFormConfig extends FormConfig {
         this.driverSnapshot = new HashMap<>(driverItems);
         configureFromItems(config);
     }
-
-
 
     // ==================== 静态注册方法 ====================
 
@@ -334,7 +331,7 @@ public class DynamicFormConfig extends FormConfig {
      * 获取动态形态
      */
     public static FormConfig getDynamicForm(Identifier formId) {
-        if (formId == null) return null;
+        if (formId == null || formId == RiderUtils.NULL) return null;
         return DYNAMIC_FORMS.get(formId);
     }
 

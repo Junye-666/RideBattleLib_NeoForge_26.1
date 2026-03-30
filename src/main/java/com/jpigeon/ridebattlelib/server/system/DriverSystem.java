@@ -43,8 +43,9 @@ public class DriverSystem {
         }
 
         boolean isAux = config.getAuxSlotDefinitions().containsKey(slotId);
-        DriverSlotDefinition slotDef = isAux ? config.getAuxSlotDefinition(slotId) : config.getSlotDefinition(slotId);
-        if (slotDef == null || !slotDef.allowedItems().contains(stack.getItem())) {
+        DriverSlotDefinition slot = isAux ? config.getAuxSlotDefinition(slotId) : config.getSlotDefinition(slotId);
+
+        if (slot == null || !slot.allowedItems().contains(stack.getItem())) {
             return false;
         }
 
@@ -63,7 +64,7 @@ public class DriverSystem {
 
         // 检查槽位是否被占用
         if (targetMap.containsKey(slotId) && !targetMap.get(slotId).isEmpty()) {
-            if (slotDef.allowReplace()) {
+            if (slot.allowReplace()) {
                 // 允许替换：先取出旧物品，再插入新物品
                 extractItem(player, slotId); // 这会归还旧物品并更新数据
                 // 重新获取更新后的目标Map

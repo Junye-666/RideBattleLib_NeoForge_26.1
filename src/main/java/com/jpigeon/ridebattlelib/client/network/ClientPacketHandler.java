@@ -9,15 +9,13 @@ import net.minecraft.client.Minecraft;
 
 public final class ClientPacketHandler {
     public static void handleHenshinStateSync(HenshinStateSyncPayload payload) {
-        Minecraft.getInstance().execute(() -> {
-            ClientTransformedCache.update(
-                    payload.playerId(),
-                    payload.isTransformed(),
-                    payload.state(),
-                    payload.currentFormId(),
-                    payload.pendingFormId()
-            );
-        });
+        Minecraft.getInstance().execute(() -> ClientTransformedCache.update(
+                payload.playerId(),
+                payload.isTransformed(),
+                payload.state(),
+                payload.currentFormId(),
+                payload.pendingFormId()
+        ));
     }
 
     public static void handleDriverDataSync(DriverDataSyncPayload payload) {
@@ -28,8 +26,6 @@ public final class ClientPacketHandler {
     }
 
     public static void handleDriverDataDiff(DriverDataDiffPayload payload) {
-        Minecraft.getInstance().execute(() -> {
-            ClientDriverDataCache.applyChanges(payload.playerId(), payload.changes(), payload.fullSync());
-        });
+        Minecraft.getInstance().execute(() -> ClientDriverDataCache.applyChanges(payload.playerId(), payload.changes(), payload.fullSync()));
     }
 }
