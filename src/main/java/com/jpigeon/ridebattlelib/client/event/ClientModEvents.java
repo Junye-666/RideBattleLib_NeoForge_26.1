@@ -8,7 +8,6 @@ import com.jpigeon.ridebattlelib.client.key.KeyBindings;
 import com.jpigeon.ridebattlelib.common.api.RideBattleAPI;
 import com.jpigeon.ridebattlelib.common.config.RiderConfig;
 import com.jpigeon.ridebattlelib.common.network.payload.*;
-import com.jpigeon.ridebattlelib.common.util.HenshinUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Player;
