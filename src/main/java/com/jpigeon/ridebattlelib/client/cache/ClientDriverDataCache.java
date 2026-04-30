@@ -28,7 +28,7 @@ public final class ClientDriverDataCache {
         }
 
         // 增量更新（需要区分主辅，此处简化，假设所有槽位属于主驱动器）
-        Map<Identifier, ItemStack> main = MAIN_ITEMS.computeIfAbsent(playerId, k -> new HashMap<>());
+        Map<Identifier, ItemStack> main = MAIN_ITEMS.computeIfAbsent(playerId, _ -> new HashMap<>());
         for (Map.Entry<Identifier, ItemStack> entry : changes.entrySet()) {
             if (entry.getValue().isEmpty()) {
                 main.remove(entry.getKey());
@@ -36,6 +36,20 @@ public final class ClientDriverDataCache {
                 main.put(entry.getKey(), entry.getValue());
             }
         }
+    }
+
+    public static Map<Identifier, ItemStack> getDriverItems(UUID playerId) {
+        // 主驱动器
+        Map<Identifier, ItemStack> main = getMainItems(playerId);
+        Map<Identifier, ItemStack> all = new HashMap<>(main);
+
+        // 辅助驱动器（仅当装备时）
+        Map<Identifier, ItemStack> aux = getAuxItems(playerId);
+        if (!aux.isEmpty()) {
+            all.putAll(aux);
+        }
+
+        return all;
     }
 
     public static Map<Identifier, ItemStack> getMainItems(UUID playerId) {
