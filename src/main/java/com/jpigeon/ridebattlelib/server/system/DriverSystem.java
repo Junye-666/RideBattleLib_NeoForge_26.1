@@ -92,7 +92,7 @@ public class DriverSystem {
 
         // 同步
         if (player instanceof ServerPlayer serverPlayer) {
-            SyncManager.getInstance().syncDriverData(serverPlayer);
+            SyncManager.getInstance().syncDriverDiff(serverPlayer, slotId, finalStack, isAux);
         }
 
         NeoForge.EVENT_BUS.post(new ItemInsertionEvent.Post(player, slotId, finalStack, config));
@@ -140,7 +140,7 @@ public class DriverSystem {
 
         // 同步
         if (player instanceof ServerPlayer serverPlayer) {
-            SyncManager.getInstance().syncDriverData(serverPlayer);
+            SyncManager.getInstance().syncDriverDiff(serverPlayer, slotId, ItemStack.EMPTY, isAux);
         }
 
         // 归还物品
