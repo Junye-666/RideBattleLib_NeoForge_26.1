@@ -39,13 +39,14 @@ public class DriverHandler {
     @SubscribeEvent
     public static void onItemRightClick(PlayerInteractEvent.RightClickItem event) {
         if (event.isCanceled()) return;
+        if (RiderRegistry.getRegisteredRiders().isEmpty()) return;
+
         Player player = event.getEntity();
         if (isInteractionOnCooldown(player)) {
             event.setCanceled(true);
             return;
         }
 
-        if (RiderRegistry.getRegisteredRiders().isEmpty()) return;
         if (event.getSide() != LogicalSide.SERVER) return;
 
         ItemStack heldItem = event.getItemStack();
