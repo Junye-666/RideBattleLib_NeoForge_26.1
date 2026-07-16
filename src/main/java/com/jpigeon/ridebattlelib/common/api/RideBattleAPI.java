@@ -29,6 +29,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import javax.annotation.Nullable;
@@ -42,8 +44,9 @@ import java.util.Map;
  * <p>
  * 所有方法均线程安全，可在客户端或服务端调用。
  */
-public class RideBattleAPI {
-    private RideBattleAPI(){}
+public final class RideBattleAPI {
+    private RideBattleAPI() {
+    }
 
     private static final HenshinSystem HENSHIN_SYSTEM = HenshinSystem.getInstance();
     private static final DriverSystem DRIVER_SYSTEM = DriverSystem.getInstance();
@@ -52,7 +55,7 @@ public class RideBattleAPI {
     private static final ItemManager ITEMS = ItemManager.getInstance();
     private static final SyncManager DATA_SYNC = SyncManager.getInstance();
 
-// ================ 变身系统快捷方法 ================
+    // ================ 变身系统快捷方法 ================
 
     /**
      * 尝试让玩家变身
@@ -63,8 +66,13 @@ public class RideBattleAPI {
      */
     public static boolean transform(Player player) {
         if (!isTransformed(player)) {
-            if (Config.DEVELOPER_MODE.get()) RideBattleLib.LOGGER.debug("尝试为玩家{}变身", player.getName().getString());
-            ClientPacketDistributor.sendToServer(new DriverActionPayload(player.getUUID()));
+            if (Config.DEVELOPER_MODE.get())
+                RideBattleLib.LOGGER.debug("尝试为玩家{}变身", player.getName().getString());
+            if (player.level().isClientSide()) {
+                ClientPacketDistributor.sendToServer(new DriverActionPayload(player.getUUID()));
+            } else {
+                getHenshinSystem().driverAction(player);
+            }
             return true;
         }
         return false;
@@ -77,10 +85,14 @@ public class RideBattleAPI {
      * @return 是否成功解除变身
      */
     public static boolean unTransform(Player player) {
-        if (isTransformed(player)) {
+        if (HenshinUtils.isTransformed(player)) {
             if (Config.DEVELOPER_MODE.get())
                 RideBattleLib.LOGGER.debug("尝试解除玩家{}变身", player.getName().getString());
-            ClientPacketDistributor.sendToServer(new UnhenshinPayload(player.getUUID()));
+            if (player.level().isClientSide()) {
+                ClientPacketDistributor.sendToServer(new UnhenshinPayload(player.getUUID()));
+            } else {
+                getHenshinSystem().unHenshin(player);
+            }
             return true;
         }
         return false;
@@ -96,7 +108,11 @@ public class RideBattleAPI {
         if (isTransformed(player) && getCurrentFormId(player) != newFormId) {
             if (Config.DEVELOPER_MODE.get())
                 RideBattleLib.LOGGER.debug("尝试切换玩家{}形态{}", player.getName().getString(), newFormId);
-            ClientPacketDistributor.sendToServer(new SwitchFormPayload(player.getUUID(), newFormId));
+            if (player.level().isClientSide()) {
+                ClientPacketDistributor.sendToServer(new SwitchFormPayload(player.getUUID(), newFormId));
+            } else {
+                getHenshinSystem().switchForm(player, newFormId);
+            }
             return true;
         }
         return false;
@@ -105,6 +121,7 @@ public class RideBattleAPI {
     /**
      * 快捷完成变身序列
      */
+    @OnlyIn(Dist.DEDICATED_SERVER)
     public static void completeHenshin(Player player) {
         if (Config.DEVELOPER_MODE.get()) RideBattleLib.LOGGER.debug("完成玩家{}变身序列", player.getName().getString());
         DriverActionManager.getInstance().completeTransformation(player);
@@ -117,7 +134,13 @@ public class RideBattleAPI {
      * 注意：此方法不触发AUTO变身
      */
     public static void insertItemToSlot(Player player, Identifier slotId, ItemStack stack) {
-        ClientPacketDistributor.sendToServer(new InsertItemPayload(player.getUUID(), slotId, stack));
+        if (Config.DEVELOPER_MODE.get())
+            RideBattleLib.LOGGER.debug("为玩家{}往槽位{}存入物品{}", player.getName().getString(), slotId, stack.getDisplayName());
+        if (player.level().isClientSide()) {
+            ClientPacketDistributor.sendToServer(new InsertItemPayload(player.getUUID(), slotId, stack));
+        } else {
+            getDriverSystem().insertItem(player, slotId, stack);
+        }
     }
 
     /**
@@ -134,7 +157,11 @@ public class RideBattleAPI {
         if (getItemForSlot(player, slotId).isEmpty()) return;
         if (Config.DEVELOPER_MODE.get())
             RideBattleLib.LOGGER.debug("为玩家{}从槽位{}取出物品", player.getName().getString(), slotId);
-        ClientPacketDistributor.sendToServer(new ExtractItemPayload(player.getUUID(), slotId));
+        if (player.level().isClientSide()) {
+            ClientPacketDistributor.sendToServer(new ExtractItemPayload(player.getUUID(), slotId));
+        } else {
+            getDriverSystem().extractItem(player, slotId);
+        }
     }
 
     /**
@@ -143,7 +170,11 @@ public class RideBattleAPI {
     public static void returnDriverItems(Player player) {
         if (Config.DEVELOPER_MODE.get())
             RideBattleLib.LOGGER.debug("返还玩家驱动器物品{}", player.getName().getString());
-        ClientPacketDistributor.sendToServer(new ReturnItemsPayload());
+        if (player.level().isClientSide()) {
+            ClientPacketDistributor.sendToServer(new ReturnItemsPayload());
+        } else {
+            getDriverSystem().returnItems(player);
+        }
     }
 
     // ================ 吃瘪系统快捷方法 ================
@@ -152,7 +183,7 @@ public class RideBattleAPI {
      * 强制解除变身
      */
     public static void penaltyUntransform(Player player) {
-        if (isTransformed(player)) {
+        if (HenshinUtils.isTransformed(player)) {
             if (Config.DEVELOPER_MODE.get())
                 RideBattleLib.LOGGER.debug("强制解除玩家{}变身", player.getName().getString());
             PenaltySystem.getInstance().penaltyUnhenshin(player);
@@ -173,7 +204,8 @@ public class RideBattleAPI {
      */
     public static boolean isInCooldown(Player player) {
         boolean inCooldown = PenaltySystem.getInstance().isInCooldown(player);
-        if (Config.DEVELOPER_MODE.get()) RideBattleLib.LOGGER.debug("玩家{}是否处于冷却状态：{}", player.getName().getString(), inCooldown);
+        if (Config.DEVELOPER_MODE.get())
+            RideBattleLib.LOGGER.debug("玩家{}是否处于冷却状态：{}", player.getName().getString(), inCooldown);
         return inCooldown;
     }
 
@@ -316,6 +348,9 @@ public class RideBattleAPI {
      */
     @Nullable
     public static Identifier getPendingForm(Player player) {
+        if (player.level().isClientSide()) {
+            return ClientTransformedCache.getPendingFormId(player.getUUID());
+        }
         RiderData data = player.getData(RiderAttachments.RIDER_DATA);
         return data.getPendingFormId();
     }
@@ -566,21 +601,21 @@ public class RideBattleAPI {
      * 强制刷新所有状态同步
      */
     public static void syncClientState(ServerPlayer player) {
-        DATA_SYNC.syncAllPlayerData(player);
+        getSyncManager().syncAllPlayerData(player);
     }
 
     /**
      * 同步驱动器数据
      */
     public static void syncDriverData(ServerPlayer player) {
-        DATA_SYNC.syncDriverData(player);
+        getSyncManager().syncDriverData(player);
     }
 
     /**
      * 同步变身状态
      */
     public static void syncHenshinState(ServerPlayer player) {
-        DATA_SYNC.syncHenshinState(player);
+        getSyncManager().syncHenshinState(player);
     }
 
     // ================ 开发便捷方法 ================
@@ -603,6 +638,7 @@ public class RideBattleAPI {
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     private static void sendSoundPacketToServer(Player player, SoundEvent sound, float volume, float pitch) {
         // 构造包并发送
         SoundPayload packet = new SoundPayload(
@@ -627,7 +663,6 @@ public class RideBattleAPI {
     public static void playPublicSound(Player player, SoundEvent sound) {
         playPublicSound(player, sound, 1.0F, 1.0F);
     }
-
 
     /**
      * 倒计时方法
@@ -679,21 +714,27 @@ public class RideBattleAPI {
             }
         }
     }
+
     public static HenshinSystem getHenshinSystem() {
         return HENSHIN_SYSTEM;
     }
+
     public static DriverSystem getDriverSystem() {
         return DRIVER_SYSTEM;
     }
+
     public static ArmorManager getArmorManager() {
         return ARMOR;
     }
+
     public static EffectAndAttributeManager getEffectManager() {
         return EFFECTS;
     }
+
     public static ItemManager getItemManager() {
         return ITEMS;
     }
+
     public static SyncManager getSyncManager() {
         return DATA_SYNC;
     }
