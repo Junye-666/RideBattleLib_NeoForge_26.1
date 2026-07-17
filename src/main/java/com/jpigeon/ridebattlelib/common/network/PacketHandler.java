@@ -6,6 +6,7 @@ import com.jpigeon.ridebattlelib.common.network.payload.*;
 import com.jpigeon.ridebattlelib.server.system.DriverSystem;
 import com.jpigeon.ridebattlelib.server.system.HenshinSystem;
 import com.jpigeon.ridebattlelib.server.system.SkillSystem;
+import com.jpigeon.ridebattlelib.server.system.helper.DriverActionManager;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,7 +21,7 @@ import java.util.Optional;
 public class PacketHandler {
     public static void register(final RegisterPayloadHandlersEvent event) {
         event.registrar(RideBattleLib.MODID)
-                .versioned("1.2.4").optional()
+                .versioned("1.2.6").optional()
                 .playToServer(DriverActionPayload.TYPE, DriverActionPayload.STREAM_CODEC,
                         (payload, context) -> {
                             Player targetPlayer = context.player().level().getPlayerByUUID(payload.playerId());
@@ -57,7 +58,7 @@ public class PacketHandler {
                             }
                         })
                 .playToServer(ReturnItemsPayload.TYPE, ReturnItemsPayload.STREAM_CODEC,
-                        (payload, context) -> DriverSystem.getInstance().returnItems(context.player()))
+                        (_, context) -> DriverSystem.getInstance().returnItems(context.player()))
                 .playToServer(ExtractItemPayload.TYPE, ExtractItemPayload.STREAM_CODEC,
                         (payload, context) -> {
                             Player targetPlayer = context.player().level().getPlayerByUUID(payload.playerId());
@@ -102,15 +103,24 @@ public class PacketHandler {
                             sender.level().playSound(null, sender, soundEvent, SoundSource.PLAYERS, payload.volume(), payload.pitch());
                         }
                 )
+                .playToServer(
+                        CompleteHenshinPayload.TYPE, CompleteHenshinPayload.STREAM_CODEC,
+                        (payload, context) -> {
+                            Player targetPlayer = context.player().level().getPlayerByUUID(payload.playerId());
+                            if (targetPlayer != null) {
+                                DriverActionManager.getInstance().completeTransformation(targetPlayer);
+                            }
+                        }
+                )
 
                 .playToClient(HenshinStateSyncPayload.TYPE, HenshinStateSyncPayload.STREAM_CODEC,
-                        (payload, context) -> ClientPacketHandler.handleHenshinStateSync(payload))
+                        (payload, _) -> ClientPacketHandler.handleHenshinStateSync(payload))
 
                 .playToClient(DriverDataSyncPayload.TYPE, DriverDataSyncPayload.STREAM_CODEC,
-                        (payload, context) -> ClientPacketHandler.handleDriverDataSync(payload))
+                        (payload, _) -> ClientPacketHandler.handleDriverDataSync(payload))
 
                 .playToClient(DriverDataDiffPayload.TYPE, DriverDataDiffPayload.STREAM_CODEC,
-                        (payload, context) -> ClientPacketHandler.handleDriverDataDiff(payload))
+                        (payload, _) -> ClientPacketHandler.handleDriverDataDiff(payload))
         ;
     }
 }
