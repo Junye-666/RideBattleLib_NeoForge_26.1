@@ -92,7 +92,7 @@ public class DynamicFormConfig extends FormConfig {
      * @param armorItem 对应的盔甲物品
      */
     public static void registerItemArmor(Item sourceItem, EquipmentSlot armorSlot, Item armorItem) {
-        ITEM_ARMOR_MAP.computeIfAbsent(sourceItem, k -> new HashMap<>())
+        ITEM_ARMOR_MAP.computeIfAbsent(sourceItem, _ -> new HashMap<>())
                 .put(armorSlot, armorItem);
     }
 
@@ -131,7 +131,7 @@ public class DynamicFormConfig extends FormConfig {
      * 注册物品效果
      */
     private static void registerItemEffects(Item item, MobEffectInstance... effectInstances) {
-        ITEM_EFFECT_MAP.computeIfAbsent(item, k -> new ArrayList<>())
+        ITEM_EFFECT_MAP.computeIfAbsent(item, _ -> new ArrayList<>())
                 .addAll(Arrays.asList(effectInstances));
     }
 
@@ -271,31 +271,79 @@ public class DynamicFormConfig extends FormConfig {
      * 生成动态形态ID
      */
     private static Identifier generateFormId(Identifier riderId,
-                                                   Map<Identifier, ItemStackTemplate> driverItems) {
+                                             Map<Identifier, ItemStackTemplate> driverItems) {
         String baseId = riderId.getPath().replace("kamen_rider_", "");
-        Set<String> itemParts = new LinkedHashSet<>();
+        Set<String> itemPaths = new LinkedHashSet<>();
 
-        for (ItemStackTemplate template : driverItems.values()) {
-            if (template != null) {
-                Identifier itemId = BuiltInRegistries.ITEM.getKey(template.item().value());
-                String trimmedId = trimCommonSuffix(itemId.getPath());
-                itemParts.add(trimmedId);
+        for (ItemStackTemplate stack : driverItems.values()) {
+            if (!stack.create().isEmpty()) {
+                itemPaths.add(BuiltInRegistries.ITEM.getKey(stack.item().value()).getPath());
             }
         }
 
-        String formPath = baseId + "_" + String.join("_", itemParts);
+        // 如果只有 0 或 1 个物品，直接保留原名
+        if (itemPaths.size() <= 1) {
+            String suffix = itemPaths.isEmpty() ? "empty" : itemPaths.iterator().next();
+            return Identifier.fromNamespaceAndPath(riderId.getNamespace(), baseId + "_" + suffix);
+        }
+
+        // 动态查找所有物品路径的最长公共后缀
+        String commonSuffix = findLongestCommonSuffix(itemPaths);
+
+        // 如果公共后缀长度 >= 2（防止把 "a" 和 "b" 的公共后缀 "" 误删），且不为空，则裁剪
+        if (commonSuffix.length() >= 2) {
+            Set<String> trimmedPaths = new LinkedHashSet<>();
+            for (String path : itemPaths) {
+                // 如果路径以该后缀结尾，则移除；否则保留原样（防止异常情况）
+                if (path.endsWith(commonSuffix)) {
+                    trimmedPaths.add(path.substring(0, path.length() - commonSuffix.length()));
+                } else {
+                    trimmedPaths.add(path);
+                }
+            }
+            itemPaths = trimmedPaths;
+        }
+
+        // 组装最终 ID
+        String formPath = baseId + "_" + String.join("_", itemPaths);
         return Identifier.fromNamespaceAndPath(riderId.getNamespace(), formPath);
     }
 
-    private static String trimCommonSuffix(String itemId) {
-        String[] suffixes = {"_memory", "_medal", "_switch", "_lock", "_gashat",
-                "_card", "_full_bottle", "_watch", "_fantasy_book", "_buckle"};
-        for (String suffix : suffixes) {
-            if (itemId.endsWith(suffix)) {
-                return itemId.substring(0, itemId.length() - suffix.length());
+    /**
+     * 查找一组字符串中共同的最长后缀，例如:
+     * <p>
+     * ["iron_ingot", "gold_ingot"] -> "_ingot"
+     * <p>
+     *       ["diamond_sword", "netherite_sword"] -> "_sword"
+     */
+    private static String findLongestCommonSuffix(Set<String> strings) {
+        if (strings.isEmpty()) return "";
+
+        String first = strings.iterator().next();
+        String bestSuffix = "";
+
+        // 从第一个下划线开始扫描，确保我们找的是“分类词”
+        int firstUnderscore = first.indexOf('_');
+        if (firstUnderscore == -1) return "";
+
+        for (int i = firstUnderscore; i < first.length(); i++) {
+            String suffix = first.substring(i);
+            // 只考虑以下划线开头的后缀，且长度至少为2（避免误删单字符）
+            if (!suffix.startsWith("_") || suffix.length() < 2) continue;
+
+            boolean allEndWith = true;
+            for (String s : strings) {
+                if (!s.endsWith(suffix)) {
+                    allEndWith = false;
+                    break;
+                }
+            }
+            // 只保留长度更长的匹配项
+            if (allEndWith && suffix.length() > bestSuffix.length()) {
+                bestSuffix = suffix;
             }
         }
-        return itemId;
+        return bestSuffix;
     }
 
     /**
