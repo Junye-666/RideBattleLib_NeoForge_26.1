@@ -7,6 +7,7 @@
   "ridebattlelib.configuration.penaltyEnabled": "Penalty Enabled",
   "ridebattlelib.configuration.penaltyThreshold": "Threshold to Penalty",
   "ridebattlelib.configuration.cooldownDuration": "Penalty Cooldown Time",
+  "ridebattlelib.configuration.penaltyReset": "Regen after Penalty",
   "ridebattlelib.configuration.knockbackStrength": "KnockBack Strength",
   "ridebattlelib.configuration.explosionPower": "Penalty Explosion Power",
   "ridebattlelib.configuration.keyCooldown": "Key Cooldown",

@@ -10,7 +10,7 @@ public final class PayloadUtils {
      * 编解码可为 null 的 ResourceLocation
      * 使用特殊字符串标记 null，避免 Optional 警告
      */
-    public static StreamCodec<@NotNull FriendlyByteBuf, @NotNull Identifier> nullableResourceLocation() {
+    public static StreamCodec<@NotNull FriendlyByteBuf, @NotNull Identifier> nullableIdentifier() {
         return StreamCodec.of(
                 (buf, loc) -> {
                     if (loc == null) {

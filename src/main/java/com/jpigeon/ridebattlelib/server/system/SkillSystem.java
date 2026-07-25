@@ -7,8 +7,8 @@ import com.jpigeon.ridebattlelib.common.config.FormConfig;
 import com.jpigeon.ridebattlelib.common.data.HenshinSessionData;
 import com.jpigeon.ridebattlelib.common.data.RiderAttachments;
 import com.jpigeon.ridebattlelib.common.data.RiderData;
-import com.jpigeon.ridebattlelib.common.event.RotateSkillEvent;
-import com.jpigeon.ridebattlelib.common.event.SkillEvent;
+import com.jpigeon.ridebattlelib.server.event.RotateSkillEvent;
+import com.jpigeon.ridebattlelib.server.event.SkillEvent;
 import com.jpigeon.ridebattlelib.common.registry.RiderRegistry;
 import com.jpigeon.ridebattlelib.common.util.HenshinUtils;
 import net.minecraft.ChatFormatting;
@@ -130,7 +130,7 @@ public class SkillSystem {
         if (cooldownMs == null || cooldownMs <= 0) return;
 
         PLAYER_SKILL_COOLDOWNS
-                .computeIfAbsent(player.getUUID(), k -> new HashMap<>())
+                .computeIfAbsent(player.getUUID(), _ -> new HashMap<>())
                 .put(skillId, System.currentTimeMillis() + cooldownMs);
 
         if (Config.DEBUG_MODE.get()) {

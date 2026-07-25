@@ -17,6 +17,7 @@ public record HenshinStateSyncPayload(
         UUID playerId,
         boolean isTransformed,
         HenshinState state,
+        Identifier riderId,
         Identifier currentFormId,
         Identifier pendingFormId
 ) implements CustomPacketPayload {
@@ -28,8 +29,9 @@ public record HenshinStateSyncPayload(
                     UUIDUtil.STREAM_CODEC, HenshinStateSyncPayload::playerId,
                     ByteBufCodecs.BOOL, HenshinStateSyncPayload::isTransformed,
                     ByteBufCodecs.fromCodec(HenshinState.CODEC), HenshinStateSyncPayload::state,
-                    PayloadUtils.nullableResourceLocation(), HenshinStateSyncPayload::currentFormId,
-                    PayloadUtils.nullableResourceLocation(), HenshinStateSyncPayload::pendingFormId,
+                    PayloadUtils.nullableIdentifier(), HenshinStateSyncPayload::riderId,
+                    PayloadUtils.nullableIdentifier(), HenshinStateSyncPayload::currentFormId,
+                    PayloadUtils.nullableIdentifier(), HenshinStateSyncPayload::pendingFormId,
                     HenshinStateSyncPayload::new
             );
 

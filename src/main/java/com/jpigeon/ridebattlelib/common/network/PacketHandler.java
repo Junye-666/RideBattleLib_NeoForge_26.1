@@ -21,7 +21,7 @@ import java.util.Optional;
 public class PacketHandler {
     public static void register(final RegisterPayloadHandlersEvent event) {
         event.registrar(RideBattleLib.MODID)
-                .versioned("1.2.6").optional()
+                .versioned("1.2.7").optional()
                 .playToServer(DriverActionPayload.TYPE, DriverActionPayload.STREAM_CODEC,
                         (payload, context) -> {
                             Player targetPlayer = context.player().level().getPlayerByUUID(payload.playerId());

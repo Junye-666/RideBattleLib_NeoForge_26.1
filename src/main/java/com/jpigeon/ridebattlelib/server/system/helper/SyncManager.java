@@ -2,6 +2,7 @@ package com.jpigeon.ridebattlelib.server.system.helper;
 
 import com.jpigeon.ridebattlelib.common.config.RiderConfig;
 import com.jpigeon.ridebattlelib.common.data.HenshinSessionData;
+import com.jpigeon.ridebattlelib.common.data.HenshinState;
 import com.jpigeon.ridebattlelib.common.data.RiderAttachments;
 import com.jpigeon.ridebattlelib.common.data.RiderData;
 import com.jpigeon.ridebattlelib.common.network.payload.DriverDataDiffPayload;
@@ -35,14 +36,24 @@ public class SyncManager {
     public void syncHenshinState(ServerPlayer player) {
         RiderData data = player.getData(RiderAttachments.RIDER_DATA);
         HenshinSessionData session = data.getSessionData();
-        HenshinStateSyncPayload payload = new HenshinStateSyncPayload(
+        Identifier riderId = null;
+
+        if (session != null) {
+            riderId = session.riderId();
+        } else if (data.getState() == HenshinState.TRANSFORMING) {
+            RiderConfig config = RiderConfig.findActiveDriverConfig(player);
+            if (config != null) riderId = config.getRiderId();
+        }
+
+        HenshinStateSyncPayload stateSyncPacket = new HenshinStateSyncPayload(
                 player.getUUID(),
                 data.isTransformed(),                     // 是否变身
                 data.getState(),                          // 状态枚举
+                riderId,                                  // 当前骑士ID
                 session != null ? session.formId() : null, // 当前形态ID
                 data.getPendingFormId()                   // 待处理形态ID
         );
-        PacketDistributor.sendToPlayer(player, payload);
+        PacketDistributor.sendToPlayer(player, stateSyncPacket);
     }
 
     /**
