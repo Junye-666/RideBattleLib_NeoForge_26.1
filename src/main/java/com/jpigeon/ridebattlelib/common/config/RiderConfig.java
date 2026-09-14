@@ -49,7 +49,7 @@ public class RiderConfig {
     private final Map<Identifier, DriverSlotDefinition> auxSlotDefinitions = new HashMap<>();
     private final Set<Identifier> requiredSlots = new HashSet<>();
     private final Set<Identifier> auxRequiredSlots = new HashSet<>();
-    private final Map<Identifier, FormConfig> forms = new HashMap<>();
+    private final Map<Identifier, FormConfig> forms = new LinkedHashMap<>();
     private final List<AttributeModifier> baseAttributes = new ArrayList<>();
     private final List<MobEffectInstance> baseEffects = new ArrayList<>();
     private boolean allowDynamicForms = false;

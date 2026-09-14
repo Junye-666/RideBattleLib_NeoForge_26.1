@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @EventBusSubscriber(modid = RideBattleLib.MODID, value = Dist.CLIENT)
 public class ClientModEvents {
+    private static final Map<UUID, Long> LAST_KEY_PRESS_TIME = new ConcurrentHashMap<>();
+
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.registerCategory(KeyBindings.RIDE_BATTLE_CATEGORY);
@@ -41,10 +43,9 @@ public class ClientModEvents {
         if (player != null) {
             ClientTransformedCache.remove(player.getUUID());
             ClientDriverDataCache.remove(player.getUUID());
+            LAST_KEY_PRESS_TIME.remove(player.getUUID());
         }
     }
-
-    private static final Map<UUID, Long> LAST_KEY_PRESS_TIME = new ConcurrentHashMap<>();
 
     @SubscribeEvent
     public static void onKeyInput(InputEvent.Key event) {

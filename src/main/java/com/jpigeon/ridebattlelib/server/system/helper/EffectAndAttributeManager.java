@@ -26,14 +26,14 @@ public class EffectAndAttributeManager {
     }
 
     public void applyAttributesAndEffects(Player player, Identifier formId) {
-        FormConfig form = getFormConfig(player, formId);
+        FormConfig form = RiderRegistry.getForm(player, formId);
         if (form != null) {
             applyAttributesAndEffects(player, form);
         }
     }
 
     public void removeAttributesAndEffects(Player player, Identifier formId) {
-        FormConfig form = getFormConfig(player, formId);
+        FormConfig form = RiderRegistry.getForm(player, formId);
         if (form != null) {
             removeAttributesAndEffects(player, form);
         }
@@ -152,23 +152,5 @@ public class EffectAndAttributeManager {
                         RideBattleLib.LOGGER.debug("移除残留效果: {}", key.registryKey()));
             }
         }
-    }
-
-    // 辅助方法：获取正确的FormConfig
-    private FormConfig getFormConfig(Player player, Identifier formId) {
-        // 优先从玩家当前骑士获取
-        FormConfig form = RiderRegistry.getForm(player, formId);
-
-        // 如果没找到，尝试动态形态
-        if (form == null) {
-            form = DynamicFormConfig.getDynamicForm(formId);
-        }
-
-        if (form == null && Config.DEBUG_MODE.get()) {
-            RideBattleLib.LOGGER.debug("未找到形态配置: {} (玩家: {})", formId,
-                    player.getName().getString());
-        }
-
-        return form;
     }
 }

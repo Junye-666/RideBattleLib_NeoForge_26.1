@@ -13,13 +13,14 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -67,14 +68,16 @@ public class DynamicFormConfig extends FormConfig {
         DEFAULT_UNDERSUIT.put(EquipmentSlot.CHEST, Items.AIR);
         DEFAULT_UNDERSUIT.put(EquipmentSlot.LEGS, Items.AIR);
         DEFAULT_UNDERSUIT.put(EquipmentSlot.FEET, Items.AIR);
-
-        scheduleCleanup();
     }
 
-    private static void scheduleCleanup() {
-        // 使用 ScheduledExecutorService 定期执行清理
-        Executors.newSingleThreadScheduledExecutor()
-                .scheduleAtFixedRate(DynamicFormConfig::cleanupUnusedForms, 5, 5, TimeUnit.MINUTES);
+    @EventBusSubscriber(modid = RideBattleLib.MODID)
+    public static class DynamicFormCleanupHandler {
+        @SubscribeEvent
+        public static void onServerTick(ServerTickEvent.Post event) {
+            // 只在服务端 tick
+            if (event.getServer().getTickCount() % 6000 != 0) return;
+            DynamicFormConfig.cleanupUnusedForms();
+        }
     }
 
     public DynamicFormConfig(Identifier formId, Map<Identifier, ItemStackTemplate> driverItems, RiderConfig config) {
@@ -87,9 +90,10 @@ public class DynamicFormConfig extends FormConfig {
 
     /**
      * 注册物品到盔甲的映射（支持指定槽位）
+     *
      * @param sourceItem 源物品
-     * @param armorSlot 盔甲槽位
-     * @param armorItem 对应的盔甲物品
+     * @param armorSlot  盔甲槽位
+     * @param armorItem  对应的盔甲物品
      */
     public static void registerItemArmor(Item sourceItem, EquipmentSlot armorSlot, Item armorItem) {
         ITEM_ARMOR_MAP.computeIfAbsent(sourceItem, _ -> new HashMap<>())
@@ -314,7 +318,7 @@ public class DynamicFormConfig extends FormConfig {
      * <p>
      * ["iron_ingot", "gold_ingot"] -> "_ingot"
      * <p>
-     *       ["diamond_sword", "netherite_sword"] -> "_sword"
+     * ["diamond_sword", "netherite_sword"] -> "_sword"
      */
     private static String findLongestCommonSuffix(Set<String> strings) {
         if (strings.isEmpty()) return "";
@@ -351,28 +355,28 @@ public class DynamicFormConfig extends FormConfig {
      */
     public static void cleanupUnusedForms() {
         long now = System.currentTimeMillis();
-        synchronized (DYNAMIC_FORMS) {
-            Iterator<Map.Entry<Identifier, FormConfig>> it = DYNAMIC_FORMS.entrySet().iterator();
-            int removedCount = 0;
 
-            while (it.hasNext()) {
-                Map.Entry<Identifier, FormConfig> entry = it.next();
-                long lastUsed = LAST_USED.getOrDefault(entry.getKey(), 0L);
+        Iterator<Map.Entry<Identifier, FormConfig>> it = DYNAMIC_FORMS.entrySet().iterator();
+        int removedCount = 0;
 
-                if (now - lastUsed > UNLOAD_DELAY) {
-                    if (Config.DEBUG_MODE.get()) {
-                        RideBattleLib.LOGGER.debug("卸载动态形态: {}", entry.getKey());
-                    }
-                    it.remove();
-                    LAST_USED.remove(entry.getKey());
-                    removedCount++;
+        while (it.hasNext()) {
+            Map.Entry<Identifier, FormConfig> entry = it.next();
+            long lastUsed = LAST_USED.getOrDefault(entry.getKey(), 0L);
+
+            if (now - lastUsed > UNLOAD_DELAY) {
+                if (Config.DEBUG_MODE.get()) {
+                    RideBattleLib.LOGGER.debug("卸载动态形态: {}", entry.getKey());
                 }
-            }
-
-            if (removedCount > 0 && Config.DEBUG_MODE.get()) {
-                RideBattleLib.LOGGER.debug("清理了 {} 个未使用的动态形态", removedCount);
+                it.remove();
+                LAST_USED.remove(entry.getKey());
+                removedCount++;
             }
         }
+
+        if (removedCount > 0 && Config.DEBUG_MODE.get()) {
+            RideBattleLib.LOGGER.debug("清理了 {} 个未使用的动态形态", removedCount);
+        }
+
     }
 
     /**
