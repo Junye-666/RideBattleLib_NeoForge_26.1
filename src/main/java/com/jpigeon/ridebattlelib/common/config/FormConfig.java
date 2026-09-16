@@ -142,7 +142,7 @@ public class FormConfig {
      * @param amplifier 等级：0为1级
      */
     public FormConfig addEffect(Holder<@NotNull MobEffect> effect, int amplifier) {
-        return addEffect(effect, 114514, amplifier, true);
+        return addEffect(effect, -1, amplifier, true);
     }
 
     /**
@@ -465,6 +465,8 @@ public class FormConfig {
         copy.triggerType = this.triggerType;
         copy.allowsEmptyDriver = this.allowsEmptyDriver;
         copy.shouldPause = this.shouldPause;
+        copy.henshinSound = this.henshinSound;
+        copy.autoCompleteTicks = this.autoCompleteTicks;
 
         // 深度复制集合
         copy.attributes.addAll(new ArrayList<>(this.attributes));
@@ -474,6 +476,8 @@ public class FormConfig {
         copy.requiredItems.putAll(new HashMap<>(this.requiredItems));
         copy.auxRequiredItems.putAll(new HashMap<>(this.auxRequiredItems));
         copy.skillIds.addAll(new ArrayList<>(this.skillIds));
+
+        // 深度复制ItemStack
         copy.grantedItems.addAll(this.grantedItems);
 
         return copy;
@@ -489,6 +493,8 @@ public class FormConfig {
         copy.boots = this.boots;
         copy.triggerType = this.triggerType;
         copy.shouldPause = this.shouldPause;
+        copy.henshinSound = this.henshinSound;
+        copy.autoCompleteTicks = this.autoCompleteTicks;
 
         // 深度复制集合
         copy.attributes.addAll(new ArrayList<>(this.attributes));

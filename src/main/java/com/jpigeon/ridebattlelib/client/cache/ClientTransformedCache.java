@@ -14,20 +14,27 @@ public final class ClientTransformedCache {
     private record CacheEntry(
             boolean isTransformed,
             HenshinState state,
+            @Nullable Identifier riderId,
             @Nullable Identifier currentFormId,
             @Nullable Identifier pendingFormId
     ) {}
 
     public static void update(UUID playerId, boolean isTransformed, HenshinState state,
+                              @Nullable Identifier riderId,
                               @Nullable Identifier currentFormId,
                               @Nullable Identifier pendingFormId) {
-        CACHE.put(playerId, new CacheEntry(isTransformed, state, currentFormId, pendingFormId));
+        CACHE.put(playerId, new CacheEntry(isTransformed, state, riderId, currentFormId, pendingFormId));
     }
 
     public static boolean isTransformed(UUID playerId) {
         CacheEntry entry = CACHE.get(playerId);
         if (entry == null) return false;
         return entry.isTransformed();
+    }
+
+    public static @Nullable Identifier getRiderId(UUID playerId) {
+        CacheEntry entry = CACHE.get(playerId);
+        return entry != null ? entry.riderId() : null;
     }
 
     public static @Nullable Identifier getCurrentFormId(UUID playerId) {

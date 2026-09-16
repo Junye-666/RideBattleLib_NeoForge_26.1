@@ -2,21 +2,24 @@ package com.jpigeon.ridebattlelib.server.system;
 
 import com.jpigeon.ridebattlelib.Config;
 import com.jpigeon.ridebattlelib.RideBattleLib;
-import com.jpigeon.ridebattlelib.common.config.DynamicFormConfig;
 import com.jpigeon.ridebattlelib.common.config.FormConfig;
+import com.jpigeon.ridebattlelib.common.config.dynamic.DynamicFormCache;
 import com.jpigeon.ridebattlelib.common.data.HenshinSessionData;
 import com.jpigeon.ridebattlelib.common.data.RiderAttachments;
 import com.jpigeon.ridebattlelib.common.data.RiderData;
-import com.jpigeon.ridebattlelib.server.event.RotateSkillEvent;
-import com.jpigeon.ridebattlelib.server.event.SkillEvent;
 import com.jpigeon.ridebattlelib.common.registry.RiderRegistry;
 import com.jpigeon.ridebattlelib.common.util.HenshinUtils;
+import com.jpigeon.ridebattlelib.server.event.RotateSkillEvent;
+import com.jpigeon.ridebattlelib.server.event.SkillEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -51,6 +54,7 @@ public class SkillSystem {
 
     /**
      * 获取玩家当前形态的技能列表
+     *
      * @param player 玩家
      * @return 技能ID列表，无技能则返回空列表
      */
@@ -61,6 +65,7 @@ public class SkillSystem {
 
     /**
      * 获取玩家当前形态配置
+     *
      * @param player 玩家
      * @return 当前形态配置，未找到则返回null
      */
@@ -73,7 +78,7 @@ public class SkillSystem {
         FormConfig form = RiderRegistry.getForm(player, data.formId());
         if (form == null) {
             // 尝试动态形态
-            form = DynamicFormConfig.getDynamicForm(data.formId());
+            form = DynamicFormCache.get(data.formId());
         }
 
         if (form == null && Config.DEBUG_MODE.get()) {
@@ -86,6 +91,7 @@ public class SkillSystem {
 
     /**
      * 获取当前选中的技能ID
+     *
      * @param player 玩家
      * @return 当前技能ID，无技能则返回null
      */
@@ -101,7 +107,7 @@ public class SkillSystem {
 
     public static int getSkillCooldown(Identifier skillId) {
         Long cooldownMs = SKILL_COOLDOWN_MAP.get(skillId);
-        return cooldownMs != null ? (int)(cooldownMs / 1000) : 0;
+        return cooldownMs != null ? (int) (cooldownMs / 1000) : 0;
     }
 
     public static boolean isSkillOnCooldown(Player player, Identifier skillId) {
@@ -122,7 +128,7 @@ public class SkillSystem {
         if (cooldownEnd == null) return 0;
 
         long remaining = cooldownEnd - System.currentTimeMillis();
-        return remaining > 0 ? (int)((remaining + 999) / 1000) : 0;
+        return remaining > 0 ? (int) ((remaining + 999) / 1000) : 0;
     }
 
     public static void startSkillCooldown(Player player, Identifier skillId) {
@@ -134,7 +140,7 @@ public class SkillSystem {
                 .put(skillId, System.currentTimeMillis() + cooldownMs);
 
         if (Config.DEBUG_MODE.get()) {
-            int cooldownSeconds = (int)(cooldownMs / 1000);
+            int cooldownSeconds = (int) (cooldownMs / 1000);
             RideBattleLib.LOGGER.debug("为玩家 {} 的技能 {} 设置冷却: {}秒",
                     player.getName().getString(), skillId, cooldownSeconds);
         }
@@ -224,7 +230,8 @@ public class SkillSystem {
 
     /**
      * 触发指定技能（简化版本）
-     * @param player 玩家
+     *
+     * @param player  玩家
      * @param skillId 技能ID
      * @return 是否成功触发
      */
@@ -234,9 +241,10 @@ public class SkillSystem {
 
     /**
      * 触发指定技能
-     * @param player 玩家
+     *
+     * @param player  玩家
      * @param skillId 技能ID
-     * @param type 触发类型
+     * @param type    触发类型
      * @return 是否成功触发
      */
     public static boolean triggerSkill(Player player, Identifier skillId, SkillEvent.SkillTriggerType type) {
@@ -250,10 +258,11 @@ public class SkillSystem {
 
     /**
      * 触发指定形态的技能
-     * @param player 玩家
-     * @param formId 形态ID
+     *
+     * @param player  玩家
+     * @param formId  形态ID
      * @param skillId 技能ID
-     * @param type 触发类型
+     * @param type    触发类型
      * @return 是否成功触发
      */
     public static boolean triggerSkill(Player player, Identifier formId,
@@ -383,6 +392,14 @@ public class SkillSystem {
 
         if (Config.DEBUG_MODE.get()) {
             RideBattleLib.LOGGER.debug("清除玩家 {} 的技能冷却", playerId);
+        }
+    }
+
+    @EventBusSubscriber(modid = RideBattleLib.MODID)
+    public static final class SkillSystemCleanupHandler {
+        @SubscribeEvent
+        public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+            SkillSystem.clearPlayerCooldowns(event.getEntity().getUUID());
         }
     }
 }

@@ -1,41 +1,35 @@
-package com.jpigeon.ridebattlelib.common.network.payload;
+package com.jpigeon.ridebattlelib.common.network.packet;
 
-import com.jpigeon.ridebattlelib.RideBattleLib;
+import com.jpigeon.ridebattlelib.common.network.RBLPacket;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public record DriverDataDiffPayload(
+public record DriverDataDiffPacket(
         UUID playerId,
-        Map<Identifier, ItemStack> changes,
-        boolean fullSync
-) implements CustomPacketPayload {
+        Map<Identifier, ItemStack> changes
+) implements RBLPacket {
 
-    public static final Identifier ID = Identifier.fromNamespaceAndPath(RideBattleLib.MODID, "driver_diff_sync");
+    public static final Identifier ID = RBLPacket.ofPath("driver_diff_sync");
 
-    public static final Type<@NotNull DriverDataDiffPayload> TYPE = new Type<>(ID);
+    public static final Type<DriverDataDiffPacket> TYPE = new Type<>(ID);
 
-    public static final StreamCodec<@NotNull RegistryFriendlyByteBuf, @NotNull DriverDataDiffPayload> STREAM_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, DriverDataDiffPacket> STREAM_CODEC =
             StreamCodec.composite(
                     UUIDUtil.STREAM_CODEC,
-                    DriverDataDiffPayload::playerId,
+                    DriverDataDiffPacket::playerId,
                     createChangesCodec(),
-                    DriverDataDiffPayload::changes,
-                    ByteBufCodecs.BOOL,
-                    DriverDataDiffPayload::fullSync,
-                    DriverDataDiffPayload::new
+                    DriverDataDiffPacket::changes,
+                    DriverDataDiffPacket::new
             );
 
-    private static StreamCodec<@NotNull RegistryFriendlyByteBuf, @NotNull Map<Identifier, ItemStack>> createChangesCodec() {
+    private static StreamCodec<RegistryFriendlyByteBuf, Map<Identifier, ItemStack>> createChangesCodec() {
         return StreamCodec.of(
                 (buf, changes) -> {
                     buf.writeVarInt(changes.size());
@@ -70,5 +64,7 @@ public record DriverDataDiffPayload(
     }
 
     @Override
-    public @NotNull Type<?> type() { return TYPE; }
+    public Identifier id() {
+        return ID;
+    }
 }

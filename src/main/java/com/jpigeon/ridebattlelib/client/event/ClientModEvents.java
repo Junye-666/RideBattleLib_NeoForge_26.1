@@ -6,8 +6,8 @@ import com.jpigeon.ridebattlelib.client.cache.ClientDriverDataCache;
 import com.jpigeon.ridebattlelib.client.cache.ClientTransformedCache;
 import com.jpigeon.ridebattlelib.client.key.KeyBindings;
 import com.jpigeon.ridebattlelib.common.api.RideBattleAPI;
-import com.jpigeon.ridebattlelib.common.config.RiderConfig;
-import com.jpigeon.ridebattlelib.common.network.payload.*;
+import com.jpigeon.ridebattlelib.common.network.packet.*;
+import com.jpigeon.ridebattlelib.common.util.HenshinUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -29,8 +29,6 @@ public class ClientModEvents {
 
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
-        event.registerCategory(KeyBindings.RIDE_BATTLE_CATEGORY);
-
         event.register(KeyBindings.UNHENSHIN_KEY);
         event.register(KeyBindings.DRIVER_KEY);
         event.register(KeyBindings.RETURN_ITEMS_KEY);
@@ -60,25 +58,22 @@ public class ClientModEvents {
         setKeyPressCooldown(player);
 
         if (KeyBindings.DRIVER_KEY.consumeClick()) {
-            RiderConfig config = RiderConfig.findActiveDriverConfig(player);
-            if (config == null) return;
-
-            if (Config.DEVELOPER_MODE.get()) {
-                RideBattleLib.LOGGER.debug("按键触发 - 玩家状态: 变身={}, 驱动器={}", ClientTransformedCache.isTransformed(player.getUUID()), config.getRiderId());
+            if (Config.DEBUG_MODE.get()) {
+                RideBattleLib.LOGGER.debug("按键触发 - 玩家状态: 变身={}", HenshinUtils.isTransformed(player));
             }
-            ClientPacketDistributor.sendToServer(new DriverActionPayload(player.getUUID()));
+            ClientPacketDistributor.sendToServer(DriverActionPacket.INSTANCE);
 
         }
         if (KeyBindings.UNHENSHIN_KEY.consumeClick()) {
             if (Config.DEBUG_MODE.get()) {
                 RideBattleLib.LOGGER.debug("发送解除变身数据包");
             }
-            ClientPacketDistributor.sendToServer(new UnhenshinPayload(player.getUUID()));
+            ClientPacketDistributor.sendToServer(UnhenshinPacket.INSTANCE);
         }
 
         if (KeyBindings.RETURN_ITEMS_KEY.consumeClick()) {
             // 触发物品返还
-            ClientPacketDistributor.sendToServer(new ReturnItemsPayload());
+            ClientPacketDistributor.sendToServer(ReturnItemsPacket.INSTANCE);
         }
 
         if (KeyBindings.SKILL_KEY.consumeClick()) {
@@ -88,9 +83,9 @@ public class ClientModEvents {
             if (!RideBattleAPI.isTransformed(player)) return;
             // 蹲下时切换技能，否则触发当前技能
             if (player.isShiftKeyDown()) {
-                ClientPacketDistributor.sendToServer(new RotateSkillPayload(player.getUUID()));
+                ClientPacketDistributor.sendToServer(RotateSkillPacket.INSTANCE);
             } else {
-                ClientPacketDistributor.sendToServer(new TriggerSkillPayload(player.getUUID()));
+                ClientPacketDistributor.sendToServer(TriggerSkillPacket.INSTANCE);
             }
         }
     }

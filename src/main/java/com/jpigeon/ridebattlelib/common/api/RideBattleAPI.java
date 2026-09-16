@@ -10,7 +10,7 @@ import com.jpigeon.ridebattlelib.common.data.HenshinSessionData;
 import com.jpigeon.ridebattlelib.common.data.HenshinState;
 import com.jpigeon.ridebattlelib.common.data.RiderAttachments;
 import com.jpigeon.ridebattlelib.common.data.RiderData;
-import com.jpigeon.ridebattlelib.common.network.payload.*;
+import com.jpigeon.ridebattlelib.common.network.packet.*;
 import com.jpigeon.ridebattlelib.common.registry.RiderRegistry;
 import com.jpigeon.ridebattlelib.common.util.HenshinUtils;
 import com.jpigeon.ridebattlelib.common.util.ScheduleUtils;
@@ -28,8 +28,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import javax.annotation.Nullable;
@@ -68,7 +66,7 @@ public final class RideBattleAPI {
             if (Config.DEVELOPER_MODE.get())
                 RideBattleLib.LOGGER.debug("尝试为玩家{}变身", player.getName().getString());
             if (player.level().isClientSide()) {
-                ClientPacketDistributor.sendToServer(new DriverActionPayload(player.getUUID()));
+                ClientPacketDistributor.sendToServer(DriverActionPacket.INSTANCE);
             } else {
                 getHenshinSystem().driverAction(player);
             }
@@ -88,7 +86,7 @@ public final class RideBattleAPI {
             if (Config.DEVELOPER_MODE.get())
                 RideBattleLib.LOGGER.debug("尝试解除玩家{}变身", player.getName().getString());
             if (player.level().isClientSide()) {
-                ClientPacketDistributor.sendToServer(new UnhenshinPayload(player.getUUID()));
+                ClientPacketDistributor.sendToServer(UnhenshinPacket.INSTANCE);
             } else {
                 getHenshinSystem().unHenshin(player);
             }
@@ -108,7 +106,7 @@ public final class RideBattleAPI {
             if (Config.DEVELOPER_MODE.get())
                 RideBattleLib.LOGGER.debug("尝试切换玩家{}形态{}", player.getName().getString(), newFormId);
             if (player.level().isClientSide()) {
-                ClientPacketDistributor.sendToServer(new SwitchFormPayload(player.getUUID(), newFormId));
+                ClientPacketDistributor.sendToServer(new SwitchFormPacket(newFormId));
             } else {
                 getHenshinSystem().switchForm(player, newFormId);
             }
@@ -123,7 +121,7 @@ public final class RideBattleAPI {
     public static void completeHenshin(Player player) {
         if (Config.DEVELOPER_MODE.get()) RideBattleLib.LOGGER.debug("完成玩家{}变身序列", player.getName().getString());
         if (player.level().isClientSide()) {
-            ClientPacketDistributor.sendToServer(new CompleteHenshinPayload(player.getUUID()));
+            ClientPacketDistributor.sendToServer(CompleteHenshinPacket.INSTANCE);
         } else {
             DriverActionManager.getInstance().completeTransformation(player);
         }
@@ -139,7 +137,7 @@ public final class RideBattleAPI {
         if (Config.DEVELOPER_MODE.get())
             RideBattleLib.LOGGER.debug("为玩家{}往槽位{}存入物品{}", player.getName().getString(), slotId, stack.getDisplayName());
         if (player.level().isClientSide()) {
-            ClientPacketDistributor.sendToServer(new InsertItemPayload(player.getUUID(), slotId, stack));
+            ClientPacketDistributor.sendToServer(new InsertItemPacket(slotId, stack));
         } else {
             getDriverSystem().insertItem(player, slotId, stack);
         }
@@ -160,7 +158,7 @@ public final class RideBattleAPI {
         if (Config.DEVELOPER_MODE.get())
             RideBattleLib.LOGGER.debug("为玩家{}从槽位{}取出物品", player.getName().getString(), slotId);
         if (player.level().isClientSide()) {
-            ClientPacketDistributor.sendToServer(new ExtractItemPayload(player.getUUID(), slotId));
+            ClientPacketDistributor.sendToServer(new ExtractItemPacket(slotId));
         } else {
             getDriverSystem().extractItem(player, slotId);
         }
@@ -173,7 +171,7 @@ public final class RideBattleAPI {
         if (Config.DEVELOPER_MODE.get())
             RideBattleLib.LOGGER.debug("返还玩家驱动器物品{}", player.getName().getString());
         if (player.level().isClientSide()) {
-            ClientPacketDistributor.sendToServer(new ReturnItemsPayload());
+            ClientPacketDistributor.sendToServer(ReturnItemsPacket.INSTANCE);
         } else {
             getDriverSystem().returnItems(player);
         }
@@ -620,19 +618,20 @@ public final class RideBattleAPI {
     public static void playPublicSound(Player player, SoundEvent sound, float volume, float pitch) {
         if (player.level().isClientSide()) {
             // 客户端：发送网络包请求服务端播放
-            sendSoundPacketToServer(player, sound, volume, pitch);
+            sendSoundPacketToServer(sound, volume, pitch);
         } else {
             // 服务端：直接广播
             player.level().playSound(null, player, sound, SoundSource.PLAYERS, volume, pitch);
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    private static void sendSoundPacketToServer(Player player, SoundEvent sound, float volume, float pitch) {
+    /**
+     * 仅客户端调用
+     */
+    private static void sendSoundPacketToServer(SoundEvent sound, float volume, float pitch) {
         // 构造包并发送
-        SoundPayload packet = new SoundPayload(
-                player.getUUID(),
-                BuiltInRegistries.SOUND_EVENT.getKey(sound),
+        SoundPacket packet = new SoundPacket(
+                sound,
                 volume,
                 pitch
         );

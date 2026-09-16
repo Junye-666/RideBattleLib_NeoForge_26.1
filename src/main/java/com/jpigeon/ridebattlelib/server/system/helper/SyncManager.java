@@ -5,9 +5,9 @@ import com.jpigeon.ridebattlelib.common.data.HenshinSessionData;
 import com.jpigeon.ridebattlelib.common.data.HenshinState;
 import com.jpigeon.ridebattlelib.common.data.RiderAttachments;
 import com.jpigeon.ridebattlelib.common.data.RiderData;
-import com.jpigeon.ridebattlelib.common.network.payload.DriverDataDiffPayload;
-import com.jpigeon.ridebattlelib.common.network.payload.DriverDataSyncPayload;
-import com.jpigeon.ridebattlelib.common.network.payload.HenshinStateSyncPayload;
+import com.jpigeon.ridebattlelib.common.network.packet.DriverDataDiffPacket;
+import com.jpigeon.ridebattlelib.common.network.packet.DriverDataSyncPacket;
+import com.jpigeon.ridebattlelib.common.network.packet.HenshinStateSyncPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -45,7 +45,7 @@ public class SyncManager {
             if (config != null) riderId = config.getRiderId();
         }
 
-        HenshinStateSyncPayload stateSyncPacket = new HenshinStateSyncPayload(
+        HenshinStateSyncPacket stateSyncPacket = new HenshinStateSyncPacket(
                 player.getUUID(),
                 data.isTransformed(),                     // 是否变身
                 data.getState(),                          // 状态枚举
@@ -67,7 +67,7 @@ public class SyncManager {
         Map<Identifier, ItemStack> mainItems = data.getMainDriverItems().getOrDefault(config.getRiderId(), new HashMap<>());
         Map<Identifier, ItemStack> auxItems = data.getAuxDriverItems().getOrDefault(config.getRiderId(), new HashMap<>());
 
-        PacketDistributor.sendToPlayer(player, new DriverDataSyncPayload(
+        PacketDistributor.sendToPlayer(player, new DriverDataSyncPacket(
                 player.getUUID(),
                 new HashMap<>(mainItems),
                 new HashMap<>(auxItems)
@@ -77,10 +77,9 @@ public class SyncManager {
     public void syncDriverDiff(ServerPlayer player, Identifier changedSlot, ItemStack newStack) {
         Map<Identifier, ItemStack> changes = new HashMap<>();
         changes.put(changedSlot, newStack.copy());
-        PacketDistributor.sendToPlayer(player, new DriverDataDiffPayload(
+        PacketDistributor.sendToPlayer(player, new DriverDataDiffPacket(
                 player.getUUID(),
-                changes,
-                false
+                changes
         ));
     }
 }

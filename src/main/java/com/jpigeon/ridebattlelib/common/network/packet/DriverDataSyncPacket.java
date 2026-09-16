@@ -1,38 +1,36 @@
-package com.jpigeon.ridebattlelib.common.network.payload;
+package com.jpigeon.ridebattlelib.common.network.packet;
 
-import com.jpigeon.ridebattlelib.RideBattleLib;
+import com.jpigeon.ridebattlelib.common.network.RBLPacket;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public record DriverDataSyncPayload(
+public record DriverDataSyncPacket(
         UUID playerId,
         Map<Identifier, ItemStack> mainItems,
         Map<Identifier, ItemStack> auxItems
-) implements CustomPacketPayload {
+) implements RBLPacket {
 
-    public static final Identifier ID = Identifier.fromNamespaceAndPath(RideBattleLib.MODID, "driver_sync");
+    public static final Identifier ID = RBLPacket.ofPath("driver_sync");
 
-    public static final StreamCodec<@NotNull RegistryFriendlyByteBuf, @NotNull DriverDataSyncPayload> STREAM_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, DriverDataSyncPacket> STREAM_CODEC =
             StreamCodec.composite(
                     UUIDUtil.STREAM_CODEC,
-                    DriverDataSyncPayload::playerId,
+                    DriverDataSyncPacket::playerId,
                     createMapCodec(),
-                    DriverDataSyncPayload::mainItems,
+                    DriverDataSyncPacket::mainItems,
                     createMapCodec(),
-                    DriverDataSyncPayload::auxItems,
-                    DriverDataSyncPayload::new
+                    DriverDataSyncPacket::auxItems,
+                    DriverDataSyncPacket::new
             );
 
-    private static StreamCodec<@NotNull RegistryFriendlyByteBuf, @NotNull Map<Identifier, ItemStack>> createMapCodec() {
+    private static StreamCodec<RegistryFriendlyByteBuf, Map<Identifier, ItemStack>> createMapCodec() {
         return StreamCodec.of(
                 (buf, map) -> {
                     buf.writeVarInt(map.size());
@@ -54,8 +52,10 @@ public record DriverDataSyncPayload(
         );
     }
 
-    public static final Type<@NotNull DriverDataSyncPayload> TYPE = new Type<>(ID);
+    public static final Type<DriverDataSyncPacket> TYPE = new Type<>(ID);
 
     @Override
-    public @NotNull Type<?> type() { return TYPE; }
+    public Identifier id() {
+        return ID;
+    }
 }

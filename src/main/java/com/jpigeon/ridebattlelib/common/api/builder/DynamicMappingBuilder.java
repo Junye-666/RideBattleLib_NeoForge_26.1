@@ -1,6 +1,6 @@
 package com.jpigeon.ridebattlelib.common.api.builder;
 
-import com.jpigeon.ridebattlelib.common.config.DynamicFormConfig;
+import com.jpigeon.ridebattlelib.common.config.dynamic.DynamicMappingRegistry;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
@@ -8,7 +8,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +33,7 @@ public class DynamicMappingBuilder {
      * 注册物品到指定槽位的盔甲映射
      */
     public DynamicMappingBuilder armor(Item source, EquipmentSlot slot, Item armor) {
-        registrations.add(() -> DynamicFormConfig.registerItemArmor(source, slot, armor));
+        registrations.add(() -> DynamicMappingRegistry.registerItemArmor(source, slot, armor));
         return this;
     }
 
@@ -42,7 +41,7 @@ public class DynamicMappingBuilder {
      * 注册物品到盔甲的映射（自动推断槽位）
      */
     public DynamicMappingBuilder armor(Item source, Item armor) {
-        registrations.add(() -> DynamicFormConfig.registerItemArmor(source, armor));
+        registrations.add(() -> DynamicMappingRegistry.registerItemArmor(source, armor));
         return this;
     }
 
@@ -51,7 +50,7 @@ public class DynamicMappingBuilder {
      */
     public DynamicMappingBuilder armors(Item source, Item... armors) {
         for (Item armor : armors) {
-            registrations.add(() -> DynamicFormConfig.registerItemArmor(source, armor));
+            registrations.add(() -> DynamicMappingRegistry.registerItemArmor(source, armor));
         }
         return this;
     }
@@ -61,16 +60,16 @@ public class DynamicMappingBuilder {
     /**
      * 注册物品附带的效果
      */
-    public DynamicMappingBuilder effect(Item source, Holder<@NotNull MobEffect> effect) {
-        registrations.add(() -> DynamicFormConfig.registerItemEffect(source, effect));
+    public DynamicMappingBuilder effect(Item source, Holder<MobEffect> effect) {
+        registrations.add(() -> DynamicMappingRegistry.registerItemEffect(source, effect));
         return this;
     }
 
     /**
      * 注册物品附带的效果（可自定义持续时间和等级）
      */
-    public DynamicMappingBuilder effect(Item source, Holder<@NotNull MobEffect> effect, int duration, int amplifier) {
-        registrations.add(() -> DynamicFormConfig.registerItemEffect(source, effect, duration, amplifier, false));
+    public DynamicMappingBuilder effect(Item source, Holder<MobEffect> effect, int duration, int amplifier) {
+        registrations.add(() -> DynamicMappingRegistry.registerItemEffect(source, effect, duration, amplifier, false));
         return this;
     }
 
@@ -78,9 +77,9 @@ public class DynamicMappingBuilder {
      * 批量注册物品附带的效果
      */
     @SafeVarargs
-    public final DynamicMappingBuilder effects(Item source, Holder<@NotNull MobEffect>... effects) {
-        for (Holder<@NotNull MobEffect> effect : effects) {
-            registrations.add(() -> DynamicFormConfig.registerItemEffect(source, effect));
+    public final DynamicMappingBuilder effects(Item source, Holder<MobEffect>... effects) {
+        for (Holder<MobEffect> effect : effects) {
+            registrations.add(() -> DynamicMappingRegistry.registerItemEffect(source, effect));
         }
         return this;
     }
@@ -91,7 +90,7 @@ public class DynamicMappingBuilder {
      * 注册物品被放入驱动器后授予的物品
      */
     public DynamicMappingBuilder grantedItems(Item source, ItemStackTemplate... granted) {
-        registrations.add(() -> DynamicFormConfig.registerItemGrantedItems(source, granted));
+        registrations.add(() -> DynamicMappingRegistry.registerItemGrantedItems(source, granted));
         return this;
     }
 
@@ -112,7 +111,7 @@ public class DynamicMappingBuilder {
      * 为当前骑士注册底衣配置
      */
     public DynamicMappingBuilder undersuit(Item helmet, Item chestplate, Item leggings, Item boots) {
-        registrations.add(() -> DynamicFormConfig.registerRiderUndersuit(
+        registrations.add(() -> DynamicMappingRegistry.registerRiderUndersuit(
                 riderId,
                 helmet != null ? helmet : Items.AIR,
                 chestplate != null ? chestplate : Items.AIR,
