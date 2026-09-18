@@ -298,16 +298,7 @@ public class FormConfig {
 
         // 处理动态形态的情况 - 如果没有特定辅助物品要求，直接返回true
         if (auxRequiredItems.isEmpty()) {
-            // 对于动态形态，只要有辅助物品就应该匹配成功
-            boolean hasAuxItems = false;
-            for (Identifier slotId : config.getAuxSlotDefinitions().keySet()) {
-                ItemStack stack = driverItems.get(slotId);
-                if (stack != null && !stack.isEmpty()) {
-                    hasAuxItems = true;
-                    break;
-                }
-            }
-            return hasAuxItems;
+            return hasAnyItem(driverItems, config.getAuxSlotDefinitions().keySet());
         }
 
         // 原有的精确匹配逻辑
@@ -345,6 +336,15 @@ public class FormConfig {
             RideBattleLib.LOGGER.debug("辅助槽位全部匹配");
         }
         return true;
+    }
+
+    private static boolean hasAnyItem(Map<Identifier, ItemStack> items,
+                                      Set<Identifier> slotIds) {
+        for (Identifier slotId : slotIds) {
+            ItemStack stack = items.get(slotId);
+            if (stack != null && !stack.isEmpty()) return true;
+        }
+        return false;
     }
 
 

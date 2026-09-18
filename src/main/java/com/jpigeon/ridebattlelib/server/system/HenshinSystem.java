@@ -6,7 +6,6 @@ import com.jpigeon.ridebattlelib.common.api.RideBattleAPI;
 import com.jpigeon.ridebattlelib.common.config.FormConfig;
 import com.jpigeon.ridebattlelib.common.config.FormMatchEngine;
 import com.jpigeon.ridebattlelib.common.config.RiderConfig;
-import com.jpigeon.ridebattlelib.common.config.dynamic.DynamicFormCache;
 import com.jpigeon.ridebattlelib.common.data.HenshinSessionData;
 import com.jpigeon.ridebattlelib.common.data.HenshinState;
 import com.jpigeon.ridebattlelib.common.data.RiderAttachments;
@@ -72,12 +71,6 @@ public class HenshinSystem {
         if (formId == null || formId.equals(RiderUtils.NULL)) return;
 
         FormConfig form = RiderRegistry.getForm(player, formId);
-        if (form == null) {
-            if (config.allowsDynamicForms()) {
-                form = DynamicFormCache.getOrCreate(config, RiderUtils.toTemplateMap(items));
-                formId = form.getFormId();
-            }
-        }
         if (form == null) return;
 
         // 激活事件
@@ -143,12 +136,6 @@ public class HenshinSystem {
         if (newFormId.equals(oldFormId)) return;
 
         FormConfig form = RiderRegistry.getForm(player, newFormId);
-        if (form == null) {
-            if (config.allowsDynamicForms()) {
-                form = DynamicFormCache.getOrCreate(config, RiderUtils.toTemplateMap(items));
-                newFormId = form.getFormId();
-            }
-        }
         if (form == null) return;
 
         ItemStack driverItem = player.getItemBySlot(config.getDriverSlot());
@@ -270,10 +257,7 @@ public class HenshinSystem {
         if (formId == null || formId.equals(RiderUtils.NULL)) return false;
 
         FormConfig form = RiderRegistry.getForm(formId);
-        if (form == null && config.allowsDynamicForms()) {
-            form = DynamicFormCache.getOrCreate(config, RiderUtils.toTemplateMap(items));
-            formId = form.getFormId();
-        }
+        if (form == null) return false;
 
         config.getHenshinStrategy().performHenshin(player, config, formId);
         transitionToState(player, HenshinState.TRANSFORMED, formId);

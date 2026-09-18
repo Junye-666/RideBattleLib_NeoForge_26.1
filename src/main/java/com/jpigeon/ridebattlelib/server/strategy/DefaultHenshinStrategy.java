@@ -91,16 +91,16 @@ public final class DefaultHenshinStrategy implements IHenshinStrategy {
             }
 
 
-        // 移除旧效果/物品
-        EffectAndAttributeManager.getInstance().removeAttributesAndEffects(player, oldFormId);
-        ItemManager.getInstance().removeGrantedItems(player, oldFormId);
+            // 移除旧效果/物品
+            EffectAndAttributeManager.getInstance().removeAttributesAndEffects(player, oldFormId);
+            ItemManager.getInstance().removeGrantedItems(player, oldFormId);
 
-        // 应用新效果/物品
-        EffectAndAttributeManager.getInstance().applyAttributesAndEffects(player, newFormId);
-        ItemManager.getInstance().grantFormItems(player, newFormId);
+            // 应用新效果/物品
+            EffectAndAttributeManager.getInstance().applyAttributesAndEffects(player, newFormId);
+            ItemManager.getInstance().grantFormItems(player, newFormId);
 
-        // 更新数据
-        HenshinUtils.saveTransformedSnapshot(player, RiderRegistry.getRider(data.riderId()), newFormId, data.originalGear(), currentDriver);
+            // 更新数据
+            HenshinUtils.updateSessionForm(player, newFormId, currentDriver);
         }
     }
 

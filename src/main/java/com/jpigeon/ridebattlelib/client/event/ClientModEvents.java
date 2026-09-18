@@ -55,25 +55,27 @@ public class ClientModEvents {
             return;
         }
 
-        setKeyPressCooldown(player);
+        boolean handled = false;
 
         if (KeyBindings.DRIVER_KEY.consumeClick()) {
             if (Config.DEBUG_MODE.get()) {
                 RideBattleLib.LOGGER.debug("按键触发 - 玩家状态: 变身={}", HenshinUtils.isTransformed(player));
             }
             ClientPacketDistributor.sendToServer(DriverActionPacket.INSTANCE);
-
+            handled = true;
         }
         if (KeyBindings.UNHENSHIN_KEY.consumeClick()) {
             if (Config.DEBUG_MODE.get()) {
                 RideBattleLib.LOGGER.debug("发送解除变身数据包");
             }
             ClientPacketDistributor.sendToServer(UnhenshinPacket.INSTANCE);
+            handled = true;
         }
 
         if (KeyBindings.RETURN_ITEMS_KEY.consumeClick()) {
             // 触发物品返还
             ClientPacketDistributor.sendToServer(ReturnItemsPacket.INSTANCE);
+            handled = true;
         }
 
         if (KeyBindings.SKILL_KEY.consumeClick()) {
@@ -84,10 +86,14 @@ public class ClientModEvents {
             // 蹲下时切换技能，否则触发当前技能
             if (player.isShiftKeyDown()) {
                 ClientPacketDistributor.sendToServer(RotateSkillPacket.INSTANCE);
+                handled = true;
             } else {
                 ClientPacketDistributor.sendToServer(TriggerSkillPacket.INSTANCE);
+                handled = true;
             }
         }
+
+        if (handled) setKeyPressCooldown(player);
     }
 
     private static boolean isKeyPressOnCooldown(Player player) {

@@ -219,12 +219,7 @@ public class RiderConfig {
             if (cachedRider != null) {
                 return RiderRegistry.getRider(cachedRider);
             }
-            // 未变身时，仍需检查装备（右键交互等场景）
-            // 但避免每次都遍历：先查缓存里的 driver 物品，再遍历
-            for (RiderConfig config : RiderRegistry.getRegisteredRiders()) {
-                if (config.isEquippedByPlayer(player)) return config;
-            }
-            return null;
+            return findByEquippedDriver(player);
         }
 
         // 服务端：走遍历
@@ -246,10 +241,20 @@ public class RiderConfig {
             }
         }
 
-        // 实例方法检查
-        for (RiderConfig config : RiderRegistry.getRegisteredRiders()) {
-            if (config.isEquippedByPlayer(player)) {
-                return config;
+        return findByEquippedDriver(player);
+    }
+
+
+    private static @Nullable RiderConfig findByEquippedDriver(Player player) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            ItemStack stack = player.getItemBySlot(slot);
+            if (stack.isEmpty()) continue;
+
+            List<RiderConfig> candidates = RiderRegistry.getRidersByDriver(stack.getItem());
+            for (RiderConfig config : candidates) {
+                if (config.getDriverSlot() == slot && config.isEquippedByPlayer(player)) {
+                    return config;
+                }
             }
         }
 
@@ -258,6 +263,7 @@ public class RiderConfig {
         }
         return null;
     }
+
 
     /**
      * 检查玩家是否装备了这个骑士的驱动器

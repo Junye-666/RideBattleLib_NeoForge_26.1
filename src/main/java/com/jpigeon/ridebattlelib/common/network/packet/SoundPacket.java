@@ -24,6 +24,6 @@ public record SoundPacket(SoundEvent sound, float volume, float pitch) implement
 
     @Override
     public Identifier id() {
-        return null;
+        return ID;
     }
 }
