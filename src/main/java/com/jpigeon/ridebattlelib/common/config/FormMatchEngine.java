@@ -24,8 +24,9 @@ public final class FormMatchEngine {
         if (override.getOverrideForm() != null) return override.getOverrideForm();
 
         if (isEmpty(items)) {
-            FormConfig base = config.getForms(config.getBaseFormId());
-            if (base != null && base.allowsEmptyDriver()) return config.getBaseFormId();
+            for (FormConfig form : config.getForms().values()) {
+                if (form.allowsEmptyDriver()) return form.getFormId();
+            }
             return RiderUtils.NULL;
         }
 

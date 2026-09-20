@@ -74,11 +74,13 @@ public class SyncManager {
         ));
     }
 
-    public void syncDriverDiff(ServerPlayer player, Identifier changedSlot, ItemStack newStack) {
+    public void syncDriverDiff(ServerPlayer player, Identifier riderId,
+                               Identifier changedSlot, ItemStack newStack) {
         Map<Identifier, ItemStack> changes = new HashMap<>();
         changes.put(changedSlot, newStack.copy());
         PacketDistributor.sendToPlayer(player, new DriverDataDiffPacket(
                 player.getUUID(),
+                riderId,
                 changes
         ));
     }

@@ -1,16 +1,19 @@
 package com.jpigeon.ridebattlelib.common.api.server;
 
+import com.jpigeon.ridebattlelib.RideBattleLib;
 import com.jpigeon.ridebattlelib.common.config.RiderConfig;
 import com.jpigeon.ridebattlelib.server.event.*;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-public final class RiderServerDispatchers {
+@EventBusSubscriber(modid = RideBattleLib.MODID)
+public final class ServerRiderDispatchers {
     private static final Map<Identifier, IRiderServerHandler> HANDLERS = new ConcurrentHashMap<>();
 
     public static void register(IRiderServerHandler handler) {

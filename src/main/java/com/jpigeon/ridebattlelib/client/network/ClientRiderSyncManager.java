@@ -32,7 +32,6 @@ public final class ClientRiderSyncManager {
             // 读取旧状态（必须在 update 之前）
             boolean wasTransformed = ClientTransformedCache.isTransformed(playerId);
             Identifier oldFormId = ClientTransformedCache.getCurrentFormId(playerId);
-            Identifier oldRiderId = ClientTransformedCache.getRiderId(playerId);
 
             // 写新状态
             ClientTransformedCache.update(
@@ -102,10 +101,12 @@ public final class ClientRiderSyncManager {
             LocalPlayer local = Minecraft.getInstance().player;
             if (local == null || !local.getUUID().equals(p.playerId())) return;
 
-            Identifier riderId = ClientTransformedCache.getRiderId(p.playerId());
+            // 直接用包里带的 riderId，不再查 ClientTransformedCache
+            Identifier riderId = p.riderId();
             RiderConfig config = riderId != null ? RiderRegistry.getRider(riderId) : null;
-            if (config == null) return;
-            ItemStack driver = local.getItemBySlot(config.getDriverSlot());
+            ItemStack driver = config != null
+                    ? local.getItemBySlot(config.getDriverSlot())
+                    : ItemStack.EMPTY;
 
             for (Map.Entry<Identifier, ItemStack> entry : p.changes().entrySet()) {
                 Identifier slotId = entry.getKey();
@@ -117,12 +118,11 @@ public final class ClientRiderSyncManager {
                         riderId,
                         ClientTransformedCache.getCurrentFormId(p.playerId()),
                         ClientTransformedCache.getPendingFormId(p.playerId()),
-                        Map.of(slotId, stack),   // 只带这一条
+                        Map.of(slotId, stack),
                         null,
                         ClientRiderContext.ChangeType.DRIVER_CHANGE
                 );
 
-                // 精确分发
                 if (stack.isEmpty()) {
                     ClientRiderDispatcher.dispatch(riderId, h -> h.onDriverItemExtracted(ctx));
                 } else {
