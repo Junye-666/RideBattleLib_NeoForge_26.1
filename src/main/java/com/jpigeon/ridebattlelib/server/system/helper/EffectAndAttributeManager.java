@@ -20,8 +20,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class EffectAndAttributeManager {
     private static final EffectAndAttributeManager INSTANCE = new EffectAndAttributeManager();
+
     public static EffectAndAttributeManager getInstance() {
         return INSTANCE;
+    }
+
+    private EffectAndAttributeManager() {
     }
 
     public void applyAttributesAndEffects(Player player, Identifier formId) {

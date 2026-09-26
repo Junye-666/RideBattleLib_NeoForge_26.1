@@ -24,6 +24,9 @@ public class ArmorManager {
         return INSTANCE;
     }
 
+    private ArmorManager() {
+    }
+
     // 装备
     public void equipArmor(Player player, FormConfig form) {
         // 先设置通用装备（固定槽位）

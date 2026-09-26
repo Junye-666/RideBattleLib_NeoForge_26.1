@@ -57,7 +57,8 @@ public final class FormMatchEngine {
         // 动态形态
         if (config.allowsDynamicForms()) {
             try {
-                return DynamicFormCache.getOrCreate(config, RiderUtils.toTemplateMap(items)).getFormId();
+                long tick = player.level().getGameTime();
+                return DynamicFormCache.getOrCreate(config, RiderUtils.toTemplateMap(items), tick).getFormId();
             } catch (Exception e) {
                 RideBattleLib.LOGGER.error("动态形态生成失败", e);
             }
