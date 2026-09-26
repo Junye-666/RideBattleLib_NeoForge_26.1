@@ -19,6 +19,7 @@ import java.util.Map;
 
 public class ArmorManager {
     private static final ArmorManager INSTANCE = new ArmorManager();
+
     public static ArmorManager getInstance() {
         return INSTANCE;
     }
@@ -86,10 +87,6 @@ public class ArmorManager {
             List<Pair<EquipmentSlot, ItemStack>> slots = Arrays.stream(EquipmentSlot.values())
                     .map(slot -> {
                         ItemStack stack = player.getItemBySlot(slot);
-                        // 确保盔甲耐久度正确显示
-                        if (stack.isDamageableItem()) {
-                            stack.setDamageValue(0);
-                        }
                         return Pair.of(slot, stack);
                     })
                     .toList();

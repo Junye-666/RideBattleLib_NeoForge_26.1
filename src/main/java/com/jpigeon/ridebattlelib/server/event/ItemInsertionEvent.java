@@ -38,6 +38,7 @@ public class ItemInsertionEvent extends Event {
 
     /**
      * 强制修改玩家插入的物品(相当于放进去就不是之前拿手上的那个物品了)
+     *
      * @param stack 顶替存入的物品
      */
     public void setStack(ItemStack stack) {
@@ -47,7 +48,7 @@ public class ItemInsertionEvent extends Event {
     /**
      * 快捷方法
      */
-    public void setStack(Item item){
+    public void setStack(Item item) {
         setStack(item.getDefaultInstance());
     }
 

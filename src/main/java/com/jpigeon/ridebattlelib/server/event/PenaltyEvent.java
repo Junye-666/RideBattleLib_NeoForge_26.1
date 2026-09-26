@@ -1,4 +1,5 @@
 package com.jpigeon.ridebattlelib.server.event;
+
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;
@@ -19,13 +20,13 @@ public class PenaltyEvent extends Event {
         }
     }
 
-    public static class Explosion extends PenaltyEvent implements ICancellableEvent{
+    public static class Explosion extends PenaltyEvent implements ICancellableEvent {
         public Explosion(Player player) {
             super(player);
         }
     }
 
-    public static class Particle extends PenaltyEvent implements ICancellableEvent{
+    public static class Particle extends PenaltyEvent implements ICancellableEvent {
         public Particle(Player player) {
             super(player);
         }

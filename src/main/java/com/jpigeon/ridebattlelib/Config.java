@@ -8,8 +8,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 
 
 @EventBusSubscriber(modid = RideBattleLib.MODID)
-public class Config
-{
+public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
     public static final ModConfigSpec.BooleanValue PENALTY_ENABLED;
@@ -64,16 +63,13 @@ public class Config
         DEVELOPER_MODE = BUILDER
                 .comment("为开发者提供的小一号日志，输出RideBattleAPI日志")
                 .define("developerMode", false);
-
-        BUILDER.build();
     }
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
     @SubscribeEvent
-    static void onLoad(final ModConfigEvent event)
-    {
-        if (Config.DEBUG_MODE.get()){
+    static void onLoad(final ModConfigEvent event) {
+        if (Config.DEBUG_MODE.get()) {
             RideBattleLib.LOGGER.debug(
                     "Loaded config: penaltyEnabled={}, penaltyThreshold={}, penaltyReset = {}, cooldown={}s, explosionPower={}, knockbackStrength={}, keyCooldown={}, interactionCooldown={}, debugMode={}, developerMode={}",
                     PENALTY_ENABLED.get(),

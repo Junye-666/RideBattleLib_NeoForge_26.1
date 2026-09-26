@@ -43,9 +43,18 @@ public class SkillEvent extends Event {
     }
 
     // Getter方法
-    public Player getPlayer() { return player; }
-    public Identifier getFormId() { return formId; }
-    public Identifier getSkillId() { return skillId; }
+    public Player getPlayer() {
+        return player;
+    }
+
+    public Identifier getFormId() {
+        return formId;
+    }
+
+    public Identifier getSkillId() {
+        return skillId;
+    }
+
     public SkillTriggerType getTriggerType() {
         return triggerType;
     }

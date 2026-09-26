@@ -20,10 +20,13 @@ import java.util.Map;
 
 public class DriverSystem {
     private static final DriverSystem INSTANCE = new DriverSystem();
+
     public static DriverSystem getInstance() {
         return INSTANCE;
     }
-    private DriverSystem() {}
+
+    private DriverSystem() {
+    }
     //====================核心方法====================
 
     /**
@@ -176,6 +179,7 @@ public class DriverSystem {
     }
 
     //====================Getters====================
+
     /**
      * 获取玩家当前驱动器所有物品（主+辅）
      */

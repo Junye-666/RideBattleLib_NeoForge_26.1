@@ -25,8 +25,7 @@ public class RiderUtils {
         Map<Identifier, ItemStack> result = new HashMap<>();
         for (Map.Entry<Identifier, ItemStackTemplate> entry : source.entrySet()) {
             ItemStackTemplate template = entry.getValue();
-            ItemStack stack = template == null ? null : template.create();
-            result.put(entry.getKey(), stack);
+            result.put(entry.getKey(), template == null ? ItemStack.EMPTY : template.create());
         }
         return result;
     }

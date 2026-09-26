@@ -32,14 +32,14 @@ public class SlotExtractionEvent extends Event {
         this.extractedStack = extractedStack;
     }
 
-    public void setAir(){
+    public void setAir() {
         setExtractedStack(Items.AIR);
     }
 
     /**
      * 快捷方法
      */
-    public void setExtractedStack(Item item){
+    public void setExtractedStack(Item item) {
         setExtractedStack(item.getDefaultInstance());
     }
 
@@ -58,6 +58,7 @@ public class SlotExtractionEvent extends Event {
     public RiderConfig getConfig() {
         return config;
     }
+
     /**
      * 可取消取出（卡里面拔不出来了）
      */

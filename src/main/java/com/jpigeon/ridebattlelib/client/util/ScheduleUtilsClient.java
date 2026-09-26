@@ -11,6 +11,6 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 public final class ScheduleUtilsClient {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
-        ScheduleUtils.getInstance().tick();
+        ScheduleUtils.getInstance().tickClient();
     }
 }

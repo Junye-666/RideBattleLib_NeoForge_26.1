@@ -22,7 +22,7 @@ public final class PayloadUtils {
                 buf -> {
                     String s = buf.readUtf();
                     if (RiderUtils.NULL_MARKER.equals(s)) {
-                        return null;
+                        return RiderUtils.NULL;
                     } else {
                         return Identifier.parse(s);
                     }

@@ -23,6 +23,7 @@ public class FindRiderConfigEvent extends Event implements ICancellableEvent {
 
     /**
      * 强制匹配骑士Config
+     *
      * @param config 返回时强制匹配
      */
     public void setConfig(RiderConfig config) {

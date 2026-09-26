@@ -242,20 +242,9 @@ public class FormConfig {
     // 匹配验证
     public boolean matchesMainSlots(Map<Identifier, ItemStack> driverItems, RiderConfig config) {
         // 处理动态形态的情况 - 如果没有特定物品要求，直接返回true
-        if (requiredItems.isEmpty() && !allowsEmptyDriver) {
-            // 检查驱动器是否为空（跳过辅助槽位）
-            boolean hasMainItems = false;
-            for (Identifier slotId : config.getSlotDefinitions().keySet()) {
-                ItemStack stack = driverItems.get(slotId);
-                if (stack != null && !stack.isEmpty()) {
-                    hasMainItems = true;
-                    break;
-                }
-            }
-
-            // 对于动态形态，只要有物品就应该匹配成功
-            // 实际的盔甲映射会在DynamicFormConfig.configureFromItems中处理
-            return hasMainItems;
+        if (requiredItems.isEmpty()) {
+            if (allowsEmptyDriver) return true;
+            return hasAnyItem(driverItems, config.getSlotDefinitions().keySet());
         }
 
         // 原有的精确匹配逻辑

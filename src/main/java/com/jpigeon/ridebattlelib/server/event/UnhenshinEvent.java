@@ -37,8 +37,19 @@ public class UnhenshinEvent extends Event {
         }
     }
 
-    public Player getPlayer() { return player; }
-    public Identifier getRiderId() { return riderId; }
-    public Identifier getFormId() { return formId; }
-    public boolean isPenalty() { return isPenalty; }
+    public Player getPlayer() {
+        return player;
+    }
+
+    public Identifier getRiderId() {
+        return riderId;
+    }
+
+    public Identifier getFormId() {
+        return formId;
+    }
+
+    public boolean isPenalty() {
+        return isPenalty;
+    }
 }
