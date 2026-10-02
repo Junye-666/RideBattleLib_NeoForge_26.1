@@ -99,11 +99,14 @@ public class HenshinSystem {
      * 解除
      */
     public void unHenshin(Player player) {
+        unHenshin(player, false);
+    }
+
+    public void unHenshin(Player player, boolean isPenalty) {
         if (player.level().isClientSide()) return;
 
         HenshinPhase phase = phaseOf(player);
-        if (phase != HenshinPhase.TRANSFORMED
-                && phase != HenshinPhase.TRANSFORMING) return;
+        if (phase != HenshinPhase.TRANSFORMED && phase != HenshinPhase.TRANSFORMING) return;
 
         HenshinSessionData data = HenshinUtils.getSessionData(player);
         if (data == null) return;
@@ -111,15 +114,13 @@ public class HenshinSystem {
         RiderConfig config = RiderRegistry.getRider(data.riderId());
         if (config == null) return;
 
-        UnhenshinEvent.Pre pre = new UnhenshinEvent.Pre(player, data);
+        UnhenshinEvent.Pre pre = new UnhenshinEvent.Pre(player, data, isPenalty);
         if (NeoForge.EVENT_BUS.post(pre).isCanceled()) return;
 
         config.getHenshinStrategy().unHenshin(player, data);
-
         transitionToState(player, HenshinState.IDLE, null);
         syncState(player);
-
-        NeoForge.EVENT_BUS.post(new UnhenshinEvent.Post(player, data));
+        NeoForge.EVENT_BUS.post(new UnhenshinEvent.Post(player, data, isPenalty));
     }
 
     /**

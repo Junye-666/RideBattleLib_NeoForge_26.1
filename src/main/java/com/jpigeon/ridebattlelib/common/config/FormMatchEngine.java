@@ -15,8 +15,7 @@ import java.util.Map;
 public final class FormMatchEngine {
     private FormMatchEngine() {}
 
-    public static @Nullable Identifier match(
-            Player player, RiderConfig config, Map<Identifier, ItemStack> items) {
+    public static @Nullable Identifier match(Player player, RiderConfig config, Map<Identifier, ItemStack> items) {
 
         FormOverrideEvent override = new FormOverrideEvent(player, items, null);
         NeoForge.EVENT_BUS.post(override);
@@ -30,21 +29,8 @@ public final class FormMatchEngine {
             return RiderUtils.NULL;
         }
 
-        // 必需槽位检查
-        for (Identifier slotId : config.getRequiredSlots()) {
-            DriverSlotDefinition def = config.getSlotDefinition(slotId);
-            if (def == null || !def.isRequired()) continue;
-            ItemStack stack = items.get(slotId);
-            if (stack == null || stack.isEmpty()) return RiderUtils.NULL;
-        }
-        for (Identifier slotId : config.getAuxRequiredSlots()) {
-            DriverSlotDefinition def = config.getAuxSlotDefinition(slotId);
-            if (def == null || !def.isRequired()) continue;
-            ItemStack stack = items.get(slotId);
-            if (stack == null || stack.isEmpty()) return RiderUtils.NULL;
-        }
-
-        // 遍历预设形态
+        // 遍历预设形态：每个形态通过自身的 requiredItems 声明它需要什么，
+        // "是否必填"由 slotDef.isRequired() 在 matchesMainSlots 里判定
         for (FormConfig form : config.getForms().values()) {
             if (form.matchesMainSlots(items, config)
                     && (form.getAuxRequiredItems().isEmpty()
@@ -54,7 +40,7 @@ public final class FormMatchEngine {
             }
         }
 
-        // 动态形态
+        // 动态形态（不受"必需槽位"约束）
         if (config.allowsDynamicForms()) {
             try {
                 long tick = player.level().getGameTime();

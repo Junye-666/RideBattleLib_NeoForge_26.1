@@ -31,7 +31,7 @@ public class PenaltySystem {
         if (player.level().isClientSide()) return;
 
         // 强制解除变身
-        HenshinSystem.getInstance().unHenshin(player);
+        HenshinSystem.getInstance().unHenshin(player, true);
         RiderConfig config = RiderConfig.findActiveDriverConfig(player);
         if (config == null) return;
 

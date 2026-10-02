@@ -4,12 +4,15 @@ import com.jpigeon.ridebattlelib.Config;
 import com.jpigeon.ridebattlelib.RideBattleLib;
 import com.jpigeon.ridebattlelib.common.data.RiderAttachments;
 import com.jpigeon.ridebattlelib.common.data.RiderData;
+import io.netty.util.internal.UnstableApi;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -48,6 +51,9 @@ public class FormConfig {
     private SoundEvent henshinSound = null;
     private int autoCompleteTicks = 0;
     private final List<Identifier> skillIds = new ArrayList<>();
+
+    private final Map<Identifier, Integer> pendingSkillCooldowns = new LinkedHashMap<>();
+    private final Map<Identifier, Component> pendingSkillNames = new HashMap<>();
 
     public FormConfig(Identifier formId) {
         this.formId = formId;
@@ -105,6 +111,7 @@ public class FormConfig {
      * @param amount      修改值
      * @param operation   修改方式
      */
+    @UnstableApi
     public FormConfig addAttribute(Identifier attributeId, double amount,
                                    AttributeModifier.Operation operation) {
         attributes.add(new AttributeModifier(attributeId, amount, operation));
@@ -115,8 +122,18 @@ public class FormConfig {
     /**
      * 添加属性（默认使用ADD_VALUE）
      */
-    public FormConfig addAttribute(Identifier attributeId, double amount) {
-        return addAttribute(attributeId, amount, AttributeModifier.Operation.ADD_VALUE);
+    public FormConfig addAttribute(Holder<Attribute> attribute, double amount,
+                                   AttributeModifier.Operation operation) {
+        Identifier id = BuiltInRegistries.ATTRIBUTE.getKey(attribute.value());
+        if (id == null) {
+            RideBattleLib.LOGGER.warn("未知属性 Holder: {}", attribute);
+            return this;
+        }
+        return addAttribute(id, amount, operation);
+    }
+
+    public FormConfig addAttribute(Holder<Attribute> attribute, double amount) {
+        return addAttribute(attribute, amount, AttributeModifier.Operation.ADD_VALUE);
     }
 
     /**
@@ -228,6 +245,23 @@ public class FormConfig {
             skillIds.add(skillId);
         }
         return this;
+    }
+
+    /**
+     * 由 FormBuilder.skill 调用 —— 只记录，不注册。
+     * 真正的注册由 RiderRegistry.registerRider 在骑士注册时统一 flush。
+     */
+    public void addPendingSkill(Identifier skillId, Component displayName, int cooldownSeconds) {
+        pendingSkillNames.put(skillId, displayName);
+        pendingSkillCooldowns.put(skillId, cooldownSeconds);
+    }
+
+    public Map<Identifier, Integer> getPendingSkillCooldowns() {
+        return Collections.unmodifiableMap(pendingSkillCooldowns);
+    }
+
+    public Map<Identifier, Component> getPendingSkillNames() {
+        return Collections.unmodifiableMap(pendingSkillNames);
     }
 
     /**

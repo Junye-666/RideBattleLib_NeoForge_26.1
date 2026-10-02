@@ -17,7 +17,7 @@ public class RiderAttachments {
                     "rider_data",
                     () -> AttachmentType.builder(() -> new RiderData())
                             .serialize(RiderData.CODEC.fieldOf("rider_data"))
-                            .copyOnDeath() // 可选：死亡时复制数据（用于重生恢复）
+                            .copyOnDeath()
                             .build()
             );
 }
