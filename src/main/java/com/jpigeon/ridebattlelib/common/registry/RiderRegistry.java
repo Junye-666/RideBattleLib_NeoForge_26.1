@@ -8,12 +8,15 @@ import com.jpigeon.ridebattlelib.common.config.RiderConfig;
 import com.jpigeon.ridebattlelib.common.config.dynamic.DynamicFormCache;
 import com.jpigeon.ridebattlelib.common.data.HenshinSessionData;
 import com.jpigeon.ridebattlelib.common.util.HenshinUtils;
+import com.jpigeon.ridebattlelib.server.event.FormRegisterEvent;
+import com.jpigeon.ridebattlelib.server.event.RiderRegisterEvent;
 import com.jpigeon.ridebattlelib.server.system.SkillSystem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -34,19 +37,22 @@ public class RiderRegistry {
     public static void registerRider(RiderConfig config) {
         RIDERS.put(config.getRiderId(), config);
 
+        NeoForge.EVENT_BUS.post(new RiderRegisterEvent(config));
+
         Item driverItem = config.getDriverItem();
         if (driverItem != null && driverItem != Items.AIR) {
             DRIVER_ITEM_INDEX
-                    .computeIfAbsent(driverItem, k -> new CopyOnWriteArrayList<>())
+                    .computeIfAbsent(driverItem, _ -> new CopyOnWriteArrayList<>())
                     .add(config);
         }
 
-        RiderArmorRegistry.registerRiderArmor(config);
-
         for (FormConfig form : config.getForms().values()) {
             registerFormForRider(form, config.getRiderId());
-            flushPendingSkills(form);   // ← 新增
+            NeoForge.EVENT_BUS.post(new FormRegisterEvent(config, form));
+            flushPendingSkills(form);
         }
+
+        RiderArmorRegistry.registerRiderArmor(config);
     }
 
     // 为特定骑士注册形态
@@ -54,7 +60,7 @@ public class RiderRegistry {
         Identifier formId = form.getFormId();
         FORMS.put(formId, form);
 
-        FORM_TO_RIDERS.computeIfAbsent(formId, k -> new HashSet<>()).add(riderId);
+        FORM_TO_RIDERS.computeIfAbsent(formId, _ -> new HashSet<>()).add(riderId);
 
         if (Config.DEBUG_MODE.get()) {
             RideBattleLib.LOGGER.debug("为骑士 {} 注册形态 {} (总注册数: {})",

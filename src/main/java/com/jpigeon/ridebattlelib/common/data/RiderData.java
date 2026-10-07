@@ -146,7 +146,7 @@ public class RiderData {
     }
 
     // ========== 深拷贝工具 ==========
-    private static Map<Identifier, Map<Identifier, ItemStack>> deepCopyMap(
+    public static Map<Identifier, Map<Identifier, ItemStack>> deepCopyMap(
             Map<Identifier, Map<Identifier, ItemStack>> original) {
         Map<Identifier, Map<Identifier, ItemStack>> copy = new HashMap<>();
         for (var entry : original.entrySet()) {

@@ -470,7 +470,6 @@ public class FormConfig {
         return skillIds.contains(skillId);
     }
 
-
     /**
      * 创建此FormConfig的深度副本
      *
@@ -480,7 +479,6 @@ public class FormConfig {
     public FormConfig copy(@Nullable Identifier newFormId) {
         FormConfig copy = new FormConfig(newFormId != null ? newFormId : this.formId);
 
-        // 复制所有基础属性
         copy.helmet = this.helmet;
         copy.chestplate = this.chestplate;
         copy.leggings = this.leggings;
@@ -491,7 +489,6 @@ public class FormConfig {
         copy.henshinSound = this.henshinSound;
         copy.autoCompleteTicks = this.autoCompleteTicks;
 
-        // 深度复制集合
         copy.attributes.addAll(new ArrayList<>(this.attributes));
         copy.effects.addAll(new ArrayList<>(this.effects));
         copy.attributeIds.addAll(new ArrayList<>(this.attributeIds));
@@ -500,9 +497,10 @@ public class FormConfig {
         copy.auxRequiredItems.putAll(new HashMap<>(this.auxRequiredItems));
         copy.skillIds.addAll(new ArrayList<>(this.skillIds));
 
-        // 深度复制ItemStack
-        copy.grantedItems.addAll(this.grantedItems);
+        copy.pendingSkillCooldowns.putAll(new LinkedHashMap<>(this.pendingSkillCooldowns));
+        copy.pendingSkillNames.putAll(new HashMap<>(this.pendingSkillNames));
 
+        copy.grantedItems.addAll(this.grantedItems);
         return copy;
     }
 
